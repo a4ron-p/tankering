@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Appearance Tracker</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Phosphor Icons for UI Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            mono: {
+              50: '#fafafa',
+              100: '#f4f4f5',
+              200: '#e4e4e7',
+              300: '#d4d4d8',
+              400: '#a1a1aa',
+              500: '#71717a',
+              600: '#52525b',
+              700: '#3f3f46',
+              800: '#27272a',
+              900: '#18181b',
+              950: '#09090b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+      color: #09090b;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Custom Scrollbar for clean aesthetics */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    .focus-ring {
+      transition: all 0.15s ease;
+    }
+    .focus-ring:focus-within, .focus-ring:focus {
+      outline: none;
+      border-color: #09090b;
+      box-shadow: 0 0 0 1px #09090b;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-white text-mono-950 flex flex-col justify-between selection:bg-mono-950 selection:text-white">
+
+  <!-- Main Wrapper -->
+  <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
+    
+    <!-- Top Header -->
+    <header class="border-b border-mono-200 pb-6 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-mono-100 text-mono-700 mb-3 border border-mono-200">
+          <i class="ph ph-calendar-blank text-sm"></i> Schedule Analytics
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-mono-950">Driver Appearance Tracker</h1>
+        <p class="text-mono-500 text-sm sm:text-base mt-1">Minimalist driver dispatch logs and assignment performance (Jan – Oct)</p>
+      </div>
+      
+      <!-- Right Action / Status -->
+      <div class="flex items-center gap-3 text-xs font-medium text-mono-500">
+        <span class="inline-block w-2 h-2 rounded-full bg-mono-950 animate-pulse"></span>
+        <span>Dataset Active • 10 Months Loaded</span>
+      </div>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" aria-label="Key Performance Metrics">
+      
+      <!-- Total Appearances -->
+      <div class="p-6 rounded-xl bg-mono-50 border border-mono-200 transition-all hover:border-mono-400">
+        <div class="flex items-center justify-between text-mono-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Total Appearances</span>
+          <i class="ph ph-list-numbers text-xl text-mono-950"></i>
+        </div>
+        <div class="text-3xl sm:text-4xl font-extrabold tracking-tight text-mono-950" id="statTotalCount">0</div>
+        <p class="text-xs text-mono-500 mt-2" id="statTotalPeriod">Calculated across selected filters</p>
+      </div>
+
+      <!-- Unique Active Drivers -->
+      <div class="p-6 rounded-xl bg-mono-50 border border-mono-200 transition-all hover:border-mono-400">
+        <div class="flex items-center justify-between text-mono-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Unique Drivers</span>
+          <i class="ph ph-users text-xl text-mono-950"></i>
+        </div>
+        <div class="text-3xl sm:text-4xl font-extrabold tracking-tight text-mono-950" id="statUniqueDrivers">0</div>
+        <p class="text-xs text-mono-500 mt-2">Active drivers in selected range</p>
+      </div>
+
+      <!-- Top Performing Driver -->
+      <div class="p-6 rounded-xl bg-mono-50 border border-mono-200 transition-all hover:border-mono-400">
+        <div class="flex items-center justify-between text-mono-500 mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider">Most Frequent Driver</span>
+          <i class="ph ph-crown text-xl text-mono-950"></i>
+        </div>
+        <div class="text-2xl sm:text-3xl font-extrabold tracking-tight text-mono-950 truncate" id="statTopDriver">--</div>
+        <p class="text-xs text-mono-500 mt-2" id="statTopDriverCount">0 total shifts in period</p>
+      </div>
+
+    </section>
+
+    <!-- Controls & Filter Toolbar -->
+    <section class="bg-mono-50 border border-mono-200 rounded-xl p-4 sm:p-5 mb-8 space-y-4">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        
+        <!-- Search Input -->
+        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
+          <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-mono-400 text-lg"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search driver name..." 
+            class="w-full pl-9 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 placeholder:text-mono-400"
+          />
+          <button id="clearSearch" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-mono-400 hover:text-mono-950 text-sm p-1">
+            <i class="ph ph-x-circle-fill"></i>
+          </button>
+        </div>
+
+        <!-- Month Filter Dropdown -->
+        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
+          <select id="monthFilter" class="w-full pl-3 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 appearance-none cursor-pointer">
+            <option value="ALL">All Months (Jan - Oct)</option>
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+          </select>
+          <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-mono-400 pointer-events-none text-sm"></i>
+        </div>
+
+        <!-- Driver Filter Dropdown -->
+        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
+          <select id="driverFilter" class="w-full pl-3 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 appearance-none cursor-pointer">
+            <option value="ALL">All Drivers</option>
+          </select>
+          <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-mono-400 pointer-events-none text-sm"></i>
+        </div>
+
+        <!-- Sort Control -->
+        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
+          <select id="sortFilter" class="w-full pl-3 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 appearance-none cursor-pointer">
+            <option value="count-desc">Sort: Count (High to Low)</option>
+            <option value="count-asc">Sort: Count (Low to High)</option>
+            <option value="name-asc">Sort: Name (A – Z)</option>
+            <option value="name-desc">Sort: Name (Z – A)</option>
+          </select>
+          <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-mono-400 pointer-events-none text-sm"></i>
+        </div>
+
+      </div>
+
+      <!-- Secondary Toolbar Row: View Mode Toggle & Reset -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-mono-200/80 text-xs font-medium">
+        
+        <!-- View Breakdown Mode Toggle -->
+        <div class="inline-flex rounded-lg border border-mono-300 p-0.5 bg-white">
+          <button id="viewSummaryBtn" class="px-3 py-1.5 rounded-md text-mono-950 font-semibold bg-mono-100 transition-all flex items-center gap-1.5">
+            <i class="ph ph-chart-bar text-sm"></i> Summary Aggregated
+          </button>
+          <button id="viewDetailedBtn" class="px-3 py-1.5 rounded-md text-mono-500 hover:text-mono-950 transition-all flex items-center gap-1.5">
+            <i class="ph ph-list-dashes text-sm"></i> Monthly Detailed Breakdown
+          </button>
+        </div>
+
+        <!-- Filter Count & Reset Button -->
+        <div class="flex items-center gap-4">
+          <span class="text-mono-500" id="resultCounter">Showing 0 entries</span>
+          <button id="resetFiltersBtn" class="text-mono-500 hover:text-mono-950 hover:underline flex items-center gap-1 transition-colors">
+            <i class="ph ph-arrow-counter-clockwise"></i> Reset Filters
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Table Presentation -->
+    <section class="bg-white border border-mono-200 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-mono-50 border-b border-mono-200 text-mono-600 uppercase text-[11px] font-semibold tracking-wider">
+              <th scope="col" class="py-3.5 px-5">#</th>
+              <th scope="col" class="py-3.5 px-5">Driver Name</th>
+              <th scope="col" class="py-3.5 px-5" id="thMonthHeader">Month</th>
+              <th scope="col" class="py-3.5 px-5 text-right">Appearances</th>
+              <th scope="col" class="py-3.5 px-5 text-right">Percentage</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-mono-100">
+            <!-- Dynamic Rows Generated Here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State Indicator -->
+      <div id="emptyState" class="hidden py-16 px-4 text-center">
+        <div class="inline-flex justify-center items-center w-12 h-12 rounded-full bg-mono-100 text-mono-400 mb-3">
+          <i class="ph ph-magnifying-glass text-2xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-mono-900">No matching drivers found</h3>
+        <p class="text-xs text-mono-500 max-w-sm mx-auto mt-1">Try adjusting your search term, changing the selected month, or clearing current filters.</p>
+        <button id="emptyStateResetBtn" class="mt-4 px-4 py-2 bg-mono-950 text-white rounded-lg text-xs font-semibold hover:bg-mono-800 transition-all">
+          Clear All Filters
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Minimal Footer -->
+  <footer class="border-t border-mono-200 py-6 text-center text-xs text-mono-500 mt-12 bg-white">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>© 2026 Driver Appearance Analytics • Clean Monochrome Interface</p>
+      <p class="font-mono text-[11px] text-mono-400">Dataset: Jan - Oct Schedule Log</p>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // Complete Master Dataset (Jan - Oct)
+    const dataset = [
+      // January
+      { month: "January", driver: "Efren Lira", count: 5 },
+      { month: "January", driver: "Emanuel Dela Rosa", count: 3 },
+      { month: "January", driver: "Den Harold Ganacan", count: 3 },
+      { month: "January", driver: "Edgar Martinez", count: 2 },
+      { month: "January", driver: "Fredie Batalla", count: 2 },
+      { month: "January", driver: "Alex Abucayon", count: 2 },
+      { month: "January", driver: "SRBW Utility", count: 1 },
+      { month: "January", driver: "Genesis Almodovar", count: 1 },
+      { month: "January", driver: "Jomer Malejan", count: 1 },
+      { month: "January", driver: "Exiel Bienvenido", count: 1 },
+      { month: "January", driver: "Marvin Cruz", count: 1 },
+
+      // February
+      { month: "February", driver: "Helbert Magistrado", count: 3 },
+      { month: "February", driver: "Efren Lira", count: 2 },
+      { month: "February", driver: "Fredie Batalla", count: 2 },
+      { month: "February", driver: "Genesis Almodovar", count: 1 },
+      { month: "February", driver: "Alvin Pamplona", count: 1 },
+      { month: "February", driver: "Emanuel Dela Rosa", count: 1 },
+      { month: "February", driver: "Alex Abucayon", count: 1 },
+      { month: "February", driver: "Reynaldo Untulan", count: 1 },
+
+      // March
+      { month: "March", driver: "Jomer Malejan", count: 4 },
+      { month: "March", driver: "Demmy Cabrera", count: 3 },
+      { month: "March", driver: "Emanuel Dela Rosa", count: 3 },
+      { month: "March", driver: "Welen Serrano", count: 2 },
+      { month: "March", driver: "Jether Jake Eglip", count: 2 },
+      { month: "March", driver: "Edgar Martinez", count: 2 },
+      { month: "March", driver: "Reynaldo Untulan", count: 2 },
+      { month: "March", driver: "Efren Lira", count: 1 },
+      { month: "March", driver: "Alex Abucayon", count: 1 },
+      { month: "March", driver: "Michael Silvestre", count: 1 },
+      { month: "March", driver: "Leo Obsequio", count: 1 },
+      { month: "March", driver: "Marvin Cruz", count: 1 },
+      { month: "March", driver: "Danilo Naanod", count: 1 },
+      { month: "March", driver: "Fredie Batalla", count: 1 },
+      { month: "March", driver: "Kenwyn Mangahis", count: 1 },
+      { month: "March", driver: "Anthony Bacong", count: 1 },
+      { month: "March", driver: "Joriel Martinez", count: 1 },
+      { month: "March", driver: "Genesis Almodovar", count: 1 },
+      { month: "March", driver: "Bryan Navarro", count: 1 },
+      { month: "March", driver: "Carlo Abag", count: 1 },
+
+      // April
+      { month: "April", driver: "Helbert Magistrado", count: 1 },
+      { month: "April", driver: "Emanuel Dela Rosa", count: 1 },
+
+      // May
+      { month: "May", driver: "Emanuel Dela Rosa", count: 2 },
+      { month: "May", driver: "Edgar Martinez", count: 2 },
+      { month: "May", driver: "Fredie Batalla", count: 1 },
+      { month: "May", driver: "Marvin Cruz", count: 1 },
+      { month: "May", driver: "Christopher Panes", count: 1 },
+      { month: "May", driver: "Jomer Malejan", count: 1 },
+      { month: "May", driver: "Efren Lira", count: 1 },
+
+      // June
+      { month: "June", driver: "Carlo Abag", count: 1 },
+      { month: "June", driver: "Demmy Cabrera", count: 1 },
+      { month: "June", driver: "Helbert Magistrado", count: 1 },
+      { month: "June", driver: "Emanuel Dela Rosa", count: 1 },
+
+      // July
+      { month: "July", driver: "Fredie Batalla", count: 2 },
+      { month: "July", driver: "Jomer Malejan", count: 2 },
+      { month: "July", driver: "Emanuel Dela Rosa", count: 2 },
+      { month: "July", driver: "Demmy Cabrera", count: 1 },
+      { month: "July", driver: "Joriel Martinez", count: 1 },
+      { month: "July", driver: "Carlo Abag", count: 1 },
+      { month: "July", driver: "Efren Lira", count: 1 },
+      { month: "July", driver: "Genesis Almodovar", count: 1 },
+      { month: "July", driver: "Brandy Waste Water", count: 1 },
+      { month: "July", driver: "Marvin Cruz", count: 1 },
+      { month: "July", driver: "Renato Maictin", count: 1 },
+      { month: "July", driver: "Edgar Martinez", count: 1 },
+
+      // August
+      { month: "August", driver: "Edgar Martinez", count: 3 },
+      { month: "August", driver: "Renato Maictin", count: 3 },
+      { month: "August", driver: "Efren Lira", count: 1 },
+      { month: "August", driver: "Emanuel Dela Rosa", count: 1 },
+      { month: "August", driver: "Bryan Navarro", count: 1 },
+      { month: "August", driver: "Wewel Cortez", count: 1 },
+      { month: "August", driver: "Fredie Batalla", count: 1 },
+      { month: "August", driver: "Jomer Malejan", count: 1 },
+      { month: "August", driver: "Demmy Cabrera", count: 1 },
+      { month: "August", driver: "Betson", count: 1 },
+      { month: "August", driver: "Joriel Martinez", count: 1 },
+      { month: "August", driver: "Erwin", count: 1 },
+      { month: "August", driver: "Carlo Abag", count: 1 },
+      { month: "August", driver: "Mark", count: 1 },
+      { month: "August", driver: "Welen Serrano", count: 1 },
+      { month: "August", driver: "Anthony Bacong", count: 1 },
+      { month: "August", driver: "Kenwyn Mangahis", count: 1 },
+      { month: "August", driver: "Jether Jake Eglip", count: 1 },
+      { month: "August", driver: "Den Harold Ganacan", count: 1 },
+      { month: "August", driver: "Marvin Cruz", count: 1 },
+      { month: "August", driver: "Exiel Bienvenido", count: 1 },
+
+      // September
+      { month: "September", driver: "Reynaldo Untulan", count: 2 },
+      { month: "September", driver: "Welen Serrano", count: 2 },
+      { month: "September", driver: "Marvin Cruz", count: 2 },
+      { month: "September", driver: "Efren Lira", count: 2 },
+      { month: "September", driver: "Renato Maictin", count: 2 },
+      { month: "September", driver: "Emanuel Dela Rosa", count: 2 },
+      { month: "September", driver: "Edgar Martinez", count: 2 },
+      { month: "September", driver: "Jether Jake Eglip", count: 2 },
+      { month: "September", driver: "Helbert Magistrado", count: 1 },
+      { month: "September", driver: "Christopher Panes", count: 1 },
+      { month: "September", driver: "Ken", count: 1 },
+      { month: "September", driver: "Marlon", count: 1 },
+      { month: "September", driver: "Jhun De Belen", count: 1 },
+      { month: "September", driver: "Harvey", count: 1 },
+      { month: "September", driver: "Jeff", count: 1 },
+      { month: "September", driver: "Michael Silvestre", count: 1 },
+      { month: "September", driver: "Jomer Malejan", count: 1 },
+
+      // October
+      { month: "October", driver: "Fredie Batalla", count: 1 },
+      { month: "October", driver: "Alex Abucayon", count: 1 },
+      { month: "October", driver: "Helbert Magistrado", count: 1 },
+      { month: "October", driver: "Efren Lira", count: 1 },
+      { month: "October", driver: "Edgar Martinez", count: 1 }
+    ];
+
+    // State Management
+    let currentViewMode = "summary"; // 'summary' or 'detailed'
+
+    // DOM References
+    const searchInput = document.getElementById("searchInput");
+    const clearSearchBtn = document.getElementById("clearSearch");
+    const monthFilter = document.getElementById("monthFilter");
+    const driverFilter = document.getElementById("driverFilter");
+    const sortFilter = document.getElementById("sortFilter");
+    const tableBody = document.getElementById("tableBody");
+    const emptyState = document.getElementById("emptyState");
+    const thMonthHeader = document.getElementById("thMonthHeader");
+    const resultCounter = document.getElementById("resultCounter");
+
+    const statTotalCount = document.getElementById("statTotalCount");
+    const statTotalPeriod = document.getElementById("statTotalPeriod");
+    const statUniqueDrivers = document.getElementById("statUniqueDrivers");
+    const statTopDriver = document.getElementById("statTopDriver");
+    const statTopDriverCount = document.getElementById("statTopDriverCount");
+
+    const viewSummaryBtn = document.getElementById("viewSummaryBtn");
+    const viewDetailedBtn = document.getElementById("viewDetailedBtn");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    const emptyStateResetBtn = document.getElementById("emptyStateResetBtn");
+
+    // Initialize Driver Filter Dropdown
+    function initDriverDropdown() {
+      const uniqueDrivers = [...new Set(dataset.map(item => item.driver))].sort();
+      driverFilter.innerHTML = '<option value="ALL">All Drivers</option>';
+      uniqueDrivers.forEach(driver => {
+        const opt = document.createElement("option");
+        opt.value = driver;
+        opt.textContent = driver;
+        driverFilter.appendChild(opt);
+      });
+    }
+
+    // Main Filter & Render Logic
+    function render() {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const selectedMonth = monthFilter.value;
+      const selectedDriver = driverFilter.value;
+      const selectedSort = sortFilter.value;
+
+      // Show/Hide search clear icon
+      if (searchTerm.length > 0) {
+        clearSearchBtn.classList.remove("hidden");
+      } else {
+        clearSearchBtn.classList.add("hidden");
+      }
+
+      // 1. Filter raw dataset
+      let filtered = dataset.filter(item => {
+        const matchSearch = item.driver.toLowerCase().includes(searchTerm);
+        const matchMonth = (selectedMonth === "ALL") || (item.month === selectedMonth);
+        const matchDriver = (selectedDriver === "ALL") || (item.driver === selectedDriver);
+        return matchSearch && matchMonth && matchDriver;
+      });
+
+      // 2. Compute Dashboard Analytics
+      const totalAppearances = filtered.reduce((acc, curr) => acc + curr.count, 0);
+      const uniqueDriversInFilter = [...new Set(filtered.map(i => i.driver))];
+      
+      // Calculate Most Frequent Driver
+      const driverCountsMap = {};
+      filtered.forEach(item => {
+        driverCountsMap[item.driver] = (driverCountsMap[item.driver] || 0) + item.count;
+      });
+
+      let topDriverName = "--";
+      let topDriverVal = 0;
+      Object.entries(driverCountsMap).forEach(([driver, val]) => {
+        if (val > topDriverVal) {
+          topDriverVal = val;
+          topDriverName = driver;
+        }
+      });
+
+      // Update Dashboard Cards
+      statTotalCount.textContent = totalAppearances;
+      statTotalPeriod.textContent = selectedMonth === "ALL" ? "Total for Jan – Oct" : `Total for ${selectedMonth}`;
+      statUniqueDrivers.textContent = uniqueDriversInFilter.length;
+      statTopDriver.textContent = topDriverName;
+      statTopDriverCount.textContent = topDriverVal > 0 ? `${topDriverVal} total shifts in range` : "No activity";
+
+      // 3. Prepare Display Rows based on View Mode
+      let displayRows = [];
+
+      if (currentViewMode === "summary") {
+        thMonthHeader.textContent = "Period";
+        // Aggregate totals by driver
+        const aggregated = {};
+        filtered.forEach(item => {
+          if (!aggregated[item.driver]) {
+            aggregated[item.driver] = 0;
+          }
+          aggregated[item.driver] += item.count;
+        });
+
+        const periodLabel = selectedMonth === "ALL" ? "Jan – Oct" : selectedMonth;
+        displayRows = Object.keys(aggregated).map(driver => ({
+          driver: driver,
+          month: periodLabel,
+          count: aggregated[driver]
+        }));
+      } else {
+        thMonthHeader.textContent = "Month";
+        // Detailed row by row view
+        displayRows = filtered.map(item => ({ ...item }));
+      }
+
+      // 4. Sort display rows
+      displayRows.sort((a, b) => {
+        if (selectedSort === "count-desc") return b.count - a.count || a.driver.localeCompare(b.driver);
+        if (selectedSort === "count-asc") return a.count - b.count || a.driver.localeCompare(b.driver);
+        if (selectedSort === "name-asc") return a.driver.localeCompare(b.driver);
+        if (selectedSort === "name-desc") return b.driver.localeCompare(a.driver);
+        return 0;
+      });
+
+      // Update Result Counter
+      resultCounter.textContent = `Showing ${displayRows.length} ${displayRows.length === 1 ? 'entry' : 'entries'}`;
+
+      // 5. Render Table HTML
+      tableBody.innerHTML = "";
+
+      if (displayRows.length === 0) {
+        emptyState.classList.remove("hidden");
+      } else {
+        emptyState.classList.add("hidden");
+
+        displayRows.forEach((row, index) => {
+          const percentage = totalAppearances > 0 ? ((row.count / totalAppearances) * 100).toFixed(1) : "0.0";
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-mono-50/80 transition-colors group";
+
+          tr.innerHTML = `
+            <td class="py-3.5 px-5 text-mono-400 font-mono text-xs w-12">${index + 1}</td>
+            <td class="py-3.5 px-5 font-semibold text-mono-950 group-hover:text-black">
+              ${escapeHtml(row.driver)}
+            </td>
+            <td class="py-3.5 px-5 text-mono-500 font-medium text-xs">
+              <span class="inline-block px-2 py-0.5 rounded bg-mono-100 text-mono-700 border border-mono-200">
+                ${escapeHtml(row.month)}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 text-right font-mono font-bold text-mono-950">
+              <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs bg-mono-950 text-white font-semibold">
+                ${row.count}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 text-right text-mono-500 font-mono text-xs">
+              ${percentage}%
+            </td>
+          `;
+
+          tableBody.appendChild(tr);
+        });
+      }
+    }
+
+    // Utility: XSS Protection
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    // Reset All Filters
+    function resetFilters() {
+      searchInput.value = "";
+      monthFilter.value = "ALL";
+      driverFilter.value = "ALL";
+      sortFilter.value = "count-desc";
+      render();
+    }
+
+    // Toggle View Mode
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      if (mode === "summary") {
+        viewSummaryBtn.className = "px-3 py-1.5 rounded-md text-mono-950 font-semibold bg-mono-100 transition-all flex items-center gap-1.5";
+        viewDetailedBtn.className = "px-3 py-1.5 rounded-md text-mono-500 hover:text-mono-950 transition-all flex items-center gap-1.5";
+      } else {
+        viewDetailedBtn.className = "px-3 py-1.5 rounded-md text-mono-950 font-semibold bg-mono-100 transition-all flex items-center gap-1.5";
+        viewSummaryBtn.className = "px-3 py-1.5 rounded-md text-mono-500 hover:text-mono-950 transition-all flex items-center gap-1.5";
+      }
+      render();
+    }
+
+    // Event Listeners
+    searchInput.addEventListener("input", render);
+    clearSearchBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      render();
+    });
+
+    monthFilter.addEventListener("change", render);
+    driverFilter.addEventListener("change", render);
+    sortFilter.addEventListener("change", render);
+
+    viewSummaryBtn.addEventListener("click", () => setViewMode("summary"));
+    viewDetailedBtn.addEventListener("click", () => setViewMode("detailed"));
+
+    resetFiltersBtn.addEventListener("click", resetFilters);
+    emptyStateResetBtn.addEventListener("click", resetFilters);
+
+    // Initial Load Execution
+    window.addEventListener("DOMContentLoaded", () => {
+      initDriverDropdown();
+      render();
+    });
+  </script>
+</body>
+</html>
