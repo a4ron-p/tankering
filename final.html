@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personnel Attendance Tracker</title>
+  <!-- SheetJS CDN for Excel Exporting -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --card-bg: #fcfcfc;
+      --border-color: #e2e8f0;
+      --border-dark: #000000;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border-dark);
+      padding-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.35rem;
+      color: #000000;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.925rem;
+    }
+
+    .btn-export {
+      background-color: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.7rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-export:hover {
+      background-color: #333333;
+      border-color: #333333;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #000000;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    select, input[type="text"] {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border: 1px solid #cbd5e1;
+      padding: 0.7rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    select:focus, select:hover, input[type="text"]:focus {
+      border-color: var(--border-dark);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+      color: #000000;
+    }
+
+    .stat-card .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .table-container {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 2.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: #000000;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.9rem 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+      padding-left: 1.25rem;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 0.8rem 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    .cell-count {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.825rem;
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .cell-zero {
+      color: #cbd5e1;
+    }
+
+    .cell-total {
+      background: #000000;
+      color: #ffffff;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div>
+        <h1>Personnel Attendance Matrix</h1>
+        <p class="subtitle">Monthly appearance counts across January to October (Unified Aliases)</p>
+      </div>
+      <button id="exportBtn" class="btn-export">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Export Matrix to Excel
+      </button>
+    </header>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="monthFilter">Select Month Focus</label>
+        <select id="monthFilter">
+          <option value="ALL">All Months (Jan – Oct Matrix)</option>
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="searchInput">Search Personnel Name</label>
+        <input type="text" id="searchInput" placeholder="Type a name (e.g. Efren, Emmanuel)...">
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="value" id="statPersonnel">0</div>
+        <div class="label">Total Personnel Listed</div>
+      </div>
+      <div class="stat-card">
+        <div class="value" id="statAppearances">0</div>
+        <div class="label">Total Appearances Recorded</div>
+      </div>
+    </div>
+
+    <!-- Attendance Matrix Table -->
+    <h2 class="section-title">Monthly Appearance Breakdown</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Personnel Name</th>
+            <th>Jan</th>
+            <th>Feb</th>
+            <th>Mar</th>
+            <th>Apr</th>
+            <th>May</th>
+            <th>Jun</th>
+            <th>Jul</th>
+            <th>Aug</th>
+            <th>Sep</th>
+            <th>Oct</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="matrixTableBody">
+          <!-- Populated dynamically via JS -->
+        </tbody>
+      </table>
+      <div id="emptyMessage" class="empty-state" style="display: none;">
+        No personnel found matching your search term.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October"];
+
+    // Standardize Name Variations / Aliases
+    function normalizeName(raw) {
+      if (!raw) return "";
+      const s = raw.trim();
+
+      if (/chris\s*panes|christoper\s*panes/i.test(s)) return "Christopher Panes";
+      if (/den\s*harold|den\s*ganacan/i.test(s)) return "Den Harold Ganacan";
+      if (/emanuel\s*dela\s*rosa|emmanuel\s*dela\s*rosa/i.test(s)) return "Emanuel Dela Rosa";
+      if (/enviro\s*bryan\s*navarro|bryan\s*navarro/i.test(s)) return "Bryan Navarro";
+      if (/freddie\s*batalla|fredie\s*batalla/i.test(s)) return "Freddie Batalla";
+      if (/helbert\s*magistrado|helbert\s*mahistrado/i.test(s)) return "Helbert Magistrado";
+      if (/^jake$|jake\s*eglip|jether\s*jake\s*eglip/i.test(s)) return "Jether Jake Eglip";
+      if (/jomer\s*malejan|jomer\s*malijan/i.test(s)) return "Jomer Malejan";
+      if (/^ken$|kenwyn\s*mangahis/i.test(s)) return "Kenwyn Mangahis";
+      if (/reynaldo\s*untulan|reynaldo\s*untolan/i.test(s)) return "Reynaldo Untulan";
+      if (/enviro\s*demmy\s*cabrera|^demmy\s*cabrera$/i.test(s)) return "Demmy Cabrera";
+      if (/enviro\s*carlo\s*abag|^carlo\s*abag$/i.test(s)) return "Carlo Abag";
+      if (/enviro\s*joriel\s*martinez|^joriel\s*martinez$/i.test(s)) return "Joriel Martinez";
+
+      return s;
+    }
+
+    // Raw list of appearances per month
+    const rawLogs = [
+      // January
+      { month: "January", names: ["Edgar Martinez"] },
+      { month: "January", names: ["Efren Lira", "Fredie Batalla"] },
+      { month: "January", names: ["Den Harold", "SRBW Utility"] },
+      { month: "January", names: ["Genesis Almodovar", "Emanuel Dela Rosa"] },
+      { month: "January", names: ["Efren Lira", "Emanuel Dela Rosa"] },
+      { month: "January", names: ["Alex Abucayon", "Jomer Malejan"] },
+      { month: "January", names: ["Den Harold Ganacan"] },
+      { month: "January", names: ["Efren Lira", "Alex Abucayon"] },
+      { month: "January", names: ["Den Ganacan", "Exiel Bienvenido"] },
+      { month: "January", names: ["Efren Lira", "Edgar Martinez"] },
+      { month: "January", names: ["Fredie Batalla", "Marvin Cruz"] },
+      { month: "January", names: ["Efren Lira", "Emanuel Dela Rosa"] },
+
+      // February
+      { month: "February", names: ["Efren Lira", "Genesis Almodovar"] },
+      { month: "February", names: ["Efren Lira", "Helbert Magistrado"] },
+      { month: "February", names: ["Helbert Magistrado", "Alvin Pamplona"] },
+      { month: "February", names: ["Fredie Batalla", "Emanuel Dela Rosa"] },
+      { month: "February", names: ["Helbert Magistrado", "Alex Abucayon"] },
+      { month: "February", names: ["Fredie Batalla", "Reynaldo Untulan"] },
+
+      // March
+      { month: "March", names: ["Efren Lira", "Alex Abucayon"] },
+      { month: "March", names: ["Michael Silvestre"] },
+      { month: "March", names: ["Welen Serrano", "Jether Jake Eglip"] },
+      { month: "March", names: ["Leo Obsequio", "Marvin Cruz", "Reynaldo Untulan"] },
+      { month: "March", names: ["Edgar Martinez", "Danilo Naanod"] },
+      { month: "March", names: ["Welen Serrano", "Jether Jake Eglip"] },
+      { month: "March", names: ["Freddie Batalla"] },
+      { month: "March", names: ["Edgar Martinez"] },
+      { month: "March", names: ["Kenwyn Mangahis"] },
+      { month: "March", names: ["Anthony Bacong"] },
+      { month: "March", names: ["Enviro Joriel Martinez"] },
+      { month: "March", names: ["Jomer Malijan"] },
+      { month: "March", names: ["Genesis Almodovar"] },
+      { month: "March", names: ["Jomer Malejan"] },
+      { month: "March", names: ["Enviro Demmy Cabrera"] },
+      { month: "March", names: ["Reynaldo Untolan"] },
+      { month: "March", names: ["Enviro Bryan Navarro", "Emanuel Dela Rosa"] },
+      { month: "March", names: ["Enviro Carlo Abag"] },
+      { month: "March", names: ["Jomer Malejan"] },
+      { month: "March", names: ["Enviro Demmy Cabrera", "Emanuel Dela Rosa"] },
+      { month: "March", names: ["Enviro Demmy Cabrera", "Emanuel Dela Rosa"] },
+
+      // April
+      { month: "April", names: ["Helbert Magistrado"] },
+      { month: "April", names: ["Emanuel Dela Rosa"] },
+
+      // May
+      { month: "May", names: ["Fredie Batalla"] },
+      { month: "May", names: ["Emanuel Dela Rosa"] },
+      { month: "May", names: ["Edgar Martinez"] },
+      { month: "May", names: ["Marvin Cruz"] },
+      { month: "May", names: ["Christopher Panes"] },
+      { month: "May", names: ["Edgar Martinez"] },
+      { month: "May", names: ["Jomer Malejan"] },
+      { month: "May", names: ["Efren Lira"] },
+      { month: "May", names: ["Emanuel Dela Rosa"] },
+
+      // June
+      { month: "June", names: ["Carlo Abag"] },
+      { month: "June", names: ["Demmy Cabrera"] },
+      { month: "June", names: ["Helbert Magistrado"] },
+      { month: "June", names: ["Emanuel Dela Rosa"] },
+
+      // July
+      { month: "July", names: ["Demmy Cabrera"] },
+      { month: "July", names: ["Joriel Martinez"] },
+      { month: "July", names: ["Carlo Abag"] },
+      { month: "July", names: ["Fredie Batalla"] },
+      { month: "July", names: ["Jomer Malejan"] },
+      { month: "July", names: ["Efren Lira"] },
+      { month: "July", names: ["Emanuel Dela Rosa"] },
+      { month: "July", names: ["Fredie Batalla"] },
+      { month: "July", names: ["Jomer Malejan"] },
+      { month: "July", names: ["Genesis Almodovar"] },
+      { month: "July", names: ["Brandy Waste Water"] },
+      { month: "July", names: ["Marvin Cruz", "Renato Maictin"] },
+      { month: "July", names: ["Edgar Martinez", "Emmanuel Dela Rosa"] },
+
+      // August
+      { month: "August", names: ["Efren Lira"] },
+      { month: "August", names: ["Emanuel Dela Rosa"] },
+      { month: "August", names: ["Bryan Navarro"] },
+      { month: "August", names: ["Wewel Cortez"] },
+      { month: "August", names: ["Fredie Batalla"] },
+      { month: "August", names: ["Jomer Malejan"] },
+      { month: "August", names: ["Demmy Cabrera"] },
+      { month: "August", names: ["Betson"] },
+      { month: "August", names: ["Joriel Martinez", "Erwin"] },
+      { month: "August", names: ["Carlo Abag", "Mark"] },
+      { month: "August", names: ["Welen Serrano", "Anthony Bacong"] },
+      { month: "August", names: ["Kenwyn Mangahis", "Jake Eglip"] },
+      { month: "August", names: ["Den Ganacan", "Marvin Cruz"] },
+      { month: "August", names: ["Edgar Martinez", "Renato Maictin"] },
+      { month: "August", names: ["Exiel Bienvenido"] },
+      { month: "August", names: ["Edgar Martinez", "Renato Maictin"] },
+      { month: "August", names: ["Edgar Martinez", "Renato Maictin"] },
+
+      // September
+      { month: "September", names: ["Helbert Magistrado", "Emanuel Dela Rosa"] },
+      { month: "September", names: ["Chris Panes", "Reynaldo Untulan", "Ken", "Jake"] },
+      { month: "September", names: ["Welen Serrano", "Marlon"] },
+      { month: "September", names: ["Marvin Cruz", "Jhun De Belen"] },
+      { month: "September", names: ["Efren Lira", "Renato Maictin"] },
+      { month: "September", names: ["Harvey"] },
+      { month: "September", names: ["Marvin Cruz", "Jeff"] },
+      { month: "September", names: ["Michael Silvestre"] },
+      { month: "September", names: ["Edgar Martinez", "Emmanuel Dela Rosa"] },
+      { month: "September", names: ["Efren Lira", "Jomer Malejan", "Reynaldo Untulan"] },
+      { month: "September", names: ["Welen Serrano", "Jake Eglip"] },
+      { month: "September", names: ["Edgar Martinez", "Renato Maictin"] },
+
+      // October
+      { month: "October", names: ["Freddie Batalla", "Alex Abucayon", "Helbert Mahistrado"] },
+      { month: "October", names: ["Efren Lira", "Edgar Martinez"] }
+    ];
+
+    // Compute Appearance Counts per Normalized Person
+    function computeMatrixData() {
+      const matrix = {};
+
+      rawLogs.forEach(entry => {
+        const m = entry.month;
+        entry.names.forEach(rawName => {
+          const person = normalizeName(rawName);
+          if (!person) return;
+
+          if (!matrix[person]) {
+            matrix[person] = {
+              January: 0, February: 0, March: 0, April: 0, May: 0,
+              June: 0, July: 0, August: 0, September: 0, October: 0,
+              total: 0
+            };
+          }
+          matrix[person][m]++;
+          matrix[person].total++;
+        });
+      });
+
+      return matrix;
+    }
+
+    const attendanceMatrix = computeMatrixData();
+
+    function render() {
+      const monthFilter = document.getElementById("monthFilter").value;
+      const searchInput = document.getElementById("searchInput").value.toLowerCase().trim();
+      const matrixTableBody = document.getElementById("matrixTableBody");
+      const emptyMessage = document.getElementById("emptyMessage");
+
+      matrixTableBody.innerHTML = "";
+
+      let personnelList = Object.keys(attendanceMatrix);
+
+      // Filter by Search Query
+      if (searchInput) {
+        personnelList = personnelList.filter(name => name.toLowerCase().includes(searchInput));
+      }
+
+      // Sort by Selected Month or Grand Total
+      personnelList.sort((a, b) => {
+        if (monthFilter !== "ALL") {
+          return attendanceMatrix[b][monthFilter] - attendanceMatrix[a][monthFilter];
+        }
+        return attendanceMatrix[b].total - attendanceMatrix[a].total;
+      });
+
+      if (personnelList.length === 0) {
+        emptyMessage.style.display = "block";
+      } else {
+        emptyMessage.style.display = "none";
+        
+        personnelList.forEach(name => {
+          const counts = attendanceMatrix[name];
+          const tr = document.createElement("tr");
+
+          let monthCells = months.map(m => {
+            const val = counts[m];
+            return val > 0 
+              ? `<td><span class="cell-count">${val}</span></td>`
+              : `<td><span class="cell-zero">0</span></td>`;
+          }).join("");
+
+          tr.innerHTML = `
+            <td>${name}</td>
+            ${monthCells}
+            <td><span class="cell-total">${counts.total}</span></td>
+          `;
+          matrixTableBody.appendChild(tr);
+        });
+      }
+
+      // Update Summary Cards
+      let totalAppearancesCount = 0;
+      personnelList.forEach(name => {
+        if (monthFilter === "ALL") {
+          totalAppearancesCount += attendanceMatrix[name].total;
+        } else {
+          totalAppearancesCount += attendanceMatrix[name][monthFilter];
+        }
+      });
+
+      document.getElementById("statPersonnel").textContent = personnelList.length;
+      document.getElementById("statAppearances").textContent = totalAppearancesCount;
+    }
+
+    // Export Matrix to Excel
+    function exportToExcel() {
+      const searchInput = document.getElementById("searchInput").value.toLowerCase().trim();
+      let personnelList = Object.keys(attendanceMatrix);
+
+      if (searchInput) {
+        personnelList = personnelList.filter(name => name.toLowerCase().includes(searchInput));
+      }
+
+      personnelList.sort((a, b) => attendanceMatrix[b].total - attendanceMatrix[a].total);
+
+      // Build Headers: Name, January ... October, Total
+      const headers = ["Personnel Name", ...months, "Total Appearances"];
+      const excelRows = [headers];
+
+      personnelList.forEach(name => {
+        const counts = attendanceMatrix[name];
+        const row = [
+          name,
+          counts.January,
+          counts.February,
+          counts.March,
+          counts.April,
+          counts.May,
+          counts.June,
+          counts.July,
+          counts.August,
+          counts.September,
+          counts.October,
+          counts.total
+        ];
+        excelRows.push(row);
+      });
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(excelRows);
+      XLSX.utils.book_append_sheet(wb, ws, "Attendance Matrix");
+
+      XLSX.writeFile(wb, "Personnel_Attendance_Matrix_Jan_Oct.xlsx");
+    }
+
+    document.getElementById("monthFilter").addEventListener("change", render);
+    document.getElementById("searchInput").addEventListener("input", render);
+    document.getElementById("exportBtn").addEventListener("click", exportToExcel);
+
+    render();
+  </script>
+</body>
+</html>
