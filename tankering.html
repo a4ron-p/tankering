@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver & Helper Attendance Tracker</title>
+  <!-- SheetJS CDN for XLSX Exporting -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --card-bg: #fcfcfc;
+      --border-color: #e2e8f0;
+      --border-dark: #000000;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --badge-driver-bg: #000000;
+      --badge-driver-text: #ffffff;
+      --badge-helper-bg: #f1f5f9;
+      --badge-helper-text: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border-dark);
+      padding-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.35rem;
+      color: #000000;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 0.925rem;
+    }
+
+    .btn-export {
+      background-color: #000000;
+      color: #ffffff;
+      border: 1px solid #000000;
+      padding: 0.7rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-export:hover {
+      background-color: #333333;
+      border-color: #333333;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #000000;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    select {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border: 1px solid #cbd5e1;
+      padding: 0.7rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    select:focus, select:hover {
+      border-color: var(--border-dark);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+      color: #000000;
+    }
+
+    .stat-card .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .table-container {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 2.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: #000000;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.825rem;
+      font-weight: 500;
+      margin-right: 0.35rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .badge-driver {
+      background-color: var(--badge-driver-bg);
+      color: var(--badge-driver-text);
+    }
+
+    .badge-helper {
+      background-color: var(--badge-helper-bg);
+      color: var(--badge-helper-text);
+      border: 1px solid #cbd5e1;
+    }
+
+    .count-pill {
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 12px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+    }
+
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div>
+        <h1>Driver & Helper Attendance Tracker</h1>
+        <p class="subtitle">Clean schedule summary and total appearances breakdown (Jan – Oct)</p>
+      </div>
+      <button id="exportBtn" class="btn-export">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Export to Excel
+      </button>
+    </header>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="monthFilter">Select Month</label>
+        <select id="monthFilter">
+          <option value="ALL">All Months (Jan – Oct)</option>
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="personFilter">Filter Personnel</label>
+        <select id="personFilter">
+          <option value="ALL">All Personnel</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="value" id="statRows">0</div>
+        <div class="label">Total Trips / Rows</div>
+      </div>
+      <div class="stat-card">
+        <div class="value" id="statDriverDuties">0</div>
+        <div class="label">Driver Duties</div>
+      </div>
+      <div class="stat-card">
+        <div class="value" id="statHelperDuties">0</div>
+        <div class="label">Helper Duties</div>
+      </div>
+    </div>
+
+    <!-- Appearance Summary Table -->
+    <h2 class="section-title">Personnel Appearance Summary</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Personnel Name</th>
+            <th>As Driver</th>
+            <th>As Helper</th>
+            <th>Total Appearances</th>
+          </tr>
+        </thead>
+        <tbody id="summaryTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Detailed Log Table -->
+    <h2 class="section-title">Schedule Logs</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Driver (1st Listed)</th>
+            <th>Helper(s)</th>
+          </tr>
+        </thead>
+        <tbody id="logTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+      <div id="emptyMessage" class="empty-state" style="display: none;">
+        No records match the selected filters.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const logs = [
+      // January
+      { month: "January", driver: "Edgar Martinez", helpers: [] },
+      { month: "January", driver: "Efren Lira", helpers: ["Fredie Batalla"] },
+      { month: "January", driver: "Den Harold", helpers: ["SRBW Utility"] },
+      { month: "January", driver: "Genesis Almodovar", helpers: ["Emanuel Dela Rosa"] },
+      { month: "January", driver: "Efren Lira", helpers: ["Emanuel Dela Rosa"] },
+      { month: "January", driver: "Alex Abucayon", helpers: ["Jomer Malejan"] },
+      { month: "January", driver: "Den Harold Ganacan", helpers: [] },
+      { month: "January", driver: "Efren Lira", helpers: ["Alex Abucayon"] },
+      { month: "January", driver: "Den Ganacan", helpers: ["Exiel Bienvenido"] },
+      { month: "January", driver: "Efren Lira", helpers: ["Edgar Martinez"] },
+      { month: "January", driver: "Fredie Batalla", helpers: ["Marvin Cruz"] },
+      { month: "January", driver: "Efren Lira", helpers: ["Emanuel Dela Rosa"] },
+
+      // February
+      { month: "February", driver: "Efren Lira", helpers: ["Genesis Almodovar"] },
+      { month: "February", driver: "Efren Lira", helpers: ["Helbert Magistrado"] },
+      { month: "February", driver: "Helbert Magistrado", helpers: ["Alvin Pamplona"] },
+      { month: "February", driver: "Fredie Batalla", helpers: ["Emanuel Dela Rosa"] },
+      { month: "February", driver: "Helbert Magistrado", helpers: ["Alex Abucayon"] },
+      { month: "February", driver: "Fredie Batalla", helpers: ["Reynaldo Untulan"] },
+
+      // March
+      { month: "March", driver: "Efren Lira", helpers: ["Alex Abucayon"] },
+      { month: "March", driver: "Michael Silvestre", helpers: [] },
+      { month: "March", driver: "Welen Serrano", helpers: ["Jether Jake Eglip"] },
+      { month: "March", driver: "Leo Obsequio", helpers: ["Marvin Cruz", "Reynaldo Untulan"] },
+      { month: "March", driver: "Edgar Martinez", helpers: ["Danilo Naanod"] },
+      { month: "March", driver: "Welen Serrano", helpers: ["Jether Jake Eglip"] },
+      { month: "March", driver: "Freddie Batalla", helpers: [] },
+      { month: "March", driver: "Edgar Martinez", helpers: [] },
+      { month: "March", driver: "Kenwyn Mangahis", helpers: [] },
+      { month: "March", driver: "Anthony Bacong", helpers: [] },
+      { month: "March", driver: "Enviro Joriel Martinez", helpers: [] },
+      { month: "March", driver: "Jomer Malijan", helpers: [] },
+      { month: "March", driver: "Genesis Almodovar", helpers: [] },
+      { month: "March", driver: "Jomer Malejan", helpers: [] },
+      { month: "March", driver: "Enviro Demmy Cabrera", helpers: [] },
+      { month: "March", driver: "Reynaldo Untolan", helpers: [] },
+      { month: "March", driver: "Enviro Bryan Navarro", helpers: [] },
+      { month: "March", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "March", driver: "Enviro Carlo Abag", helpers: [] },
+      { month: "March", driver: "Jomer Malejan", helpers: [] },
+      { month: "March", driver: "Enviro Demmy Cabrera", helpers: [] },
+      { month: "March", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "March", driver: "Enviro Demmy Cabrera", helpers: [] },
+      { month: "March", driver: "Emanuel Dela Rosa", helpers: [] },
+
+      // April
+      { month: "April", driver: "Helbert Magistrado", helpers: [] },
+      { month: "April", driver: "Emanuel Dela Rosa", helpers: [] },
+
+      // May
+      { month: "May", driver: "Fredie Batalla", helpers: [] },
+      { month: "May", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "May", driver: "Edgar Martinez", helpers: [] },
+      { month: "May", driver: "Marvin Cruz", helpers: [] },
+      { month: "May", driver: "Christopher Panes", helpers: [] },
+      { month: "May", driver: "Edgar Martinez", helpers: [] },
+      { month: "May", driver: "Jomer Malejan", helpers: [] },
+      { month: "May", driver: "Efren Lira", helpers: [] },
+      { month: "May", driver: "Emanuel Dela Rosa", helpers: [] },
+
+      // June
+      { month: "June", driver: "Carlo Abag", helpers: [] },
+      { month: "June", driver: "Demmy Cabrera", helpers: [] },
+      { month: "June", driver: "Helbert Magistrado", helpers: [] },
+      { month: "June", driver: "Emanuel Dela Rosa", helpers: [] },
+
+      // July
+      { month: "July", driver: "Demmy Cabrera", helpers: [] },
+      { month: "July", driver: "Joriel Martinez", helpers: [] },
+      { month: "July", driver: "Carlo Abag", helpers: [] },
+      { month: "July", driver: "Fredie Batalla", helpers: [] },
+      { month: "July", driver: "Jomer Malejan", helpers: [] },
+      { month: "July", driver: "Efren Lira", helpers: [] },
+      { month: "July", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "July", driver: "Fredie Batalla", helpers: [] },
+      { month: "July", driver: "Jomer Malejan", helpers: [] },
+      { month: "July", driver: "Genesis Almodovar", helpers: [] },
+      { month: "July", driver: "Brandy Waste Water", helpers: [] },
+      { month: "July", driver: "Marvin Cruz", helpers: ["Renato Maictin"] },
+      { month: "July", driver: "Edgar Martinez", helpers: ["Emmanuel Dela Rosa"] },
+
+      // August
+      { month: "August", driver: "Efren Lira", helpers: [] },
+      { month: "August", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "August", driver: "Bryan Navarro", helpers: [] },
+      { month: "August", driver: "Wewel Cortez", helpers: [] },
+      { month: "August", driver: "Fredie Batalla", helpers: [] },
+      { month: "August", driver: "Jomer Malejan", helpers: [] },
+      { month: "August", driver: "Demmy Cabrera", helpers: [] },
+      { month: "August", driver: "Betson", helpers: [] },
+      { month: "August", driver: "Joriel Martinez", helpers: ["Erwin"] },
+      { month: "August", driver: "Carlo Abag", helpers: ["Mark"] },
+      { month: "August", driver: "Welen Serrano", helpers: ["Anthony Bacong"] },
+      { month: "August", driver: "Kenwyn Mangahis", helpers: ["Jake Eglip"] },
+      { month: "August", driver: "Den Ganacan", helpers: ["Marvin Cruz"] },
+      { month: "August", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
+      { month: "August", driver: "Exiel Bienvenido", helpers: [] },
+      { month: "August", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
+      { month: "August", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
+
+      // September
+      { month: "September", driver: "Helbert Magistrado", helpers: ["Emanuel Dela Rosa"] },
+      { month: "September", driver: "Chris Panes", helpers: ["Reynaldo Untulan", "Ken", "Jake"] },
+      { month: "September", driver: "Welen Serrano", helpers: ["Marlon"] },
+      { month: "September", driver: "Marvin Cruz", helpers: ["Jhun De Belen"] },
+      { month: "September", driver: "Efren Lira", helpers: ["Renato Maictin"] },
+      { month: "September", driver: "Harvey", helpers: [] },
+      { month: "September", driver: "Marvin Cruz", helpers: ["Jeff"] },
+      { month: "September", driver: "Michael Silvestre", helpers: [] },
+      { month: "September", driver: "Edgar Martinez", helpers: ["Emmanuel Dela Rosa"] },
+      { month: "September", driver: "Efren Lira", helpers: ["Jomer Malejan", "Reynaldo Untulan"] },
+      { month: "September", driver: "Welen Serrano", helpers: ["Jake Eglip"] },
+      { month: "September", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
+
+      // October
+      { month: "October", driver: "Freddie Batalla", helpers: ["Alex Abucayon", "Helbert Mahistrado"] },
+      { month: "October", driver: "Efren Lira", helpers: ["Edgar Martinez"] }
+    ];
+
+    function populatePersonDropdown() {
+      const personSelect = document.getElementById("personFilter");
+      const personSet = new Set();
+
+      logs.forEach(row => {
+        if (row.driver) personSet.add(row.driver);
+        row.helpers.forEach(h => personSet.add(h));
+      });
+
+      Array.from(personSet).sort().forEach(person => {
+        const opt = document.createElement("option");
+        opt.value = person;
+        opt.textContent = person;
+        personSelect.appendChild(opt);
+      });
+    }
+
+    function render() {
+      const selectedMonth = document.getElementById("monthFilter").value;
+      const selectedPerson = document.getElementById("personFilter").value;
+
+      const logTableBody = document.getElementById("logTableBody");
+      const summaryTableBody = document.getElementById("summaryTableBody");
+      const emptyMessage = document.getElementById("emptyMessage");
+
+      // Filter Logs
+      let filteredLogs = logs.filter(row => {
+        if (selectedMonth !== "ALL" && row.month !== selectedMonth) return false;
+        if (selectedPerson !== "ALL") {
+          return row.driver === selectedPerson || row.helpers.includes(selectedPerson);
+        }
+        return true;
+      });
+
+      // Calculate Appearance Breakdown
+      const personStats = {};
+
+      filteredLogs.forEach(row => {
+        if (row.driver) {
+          if (!personStats[row.driver]) personStats[row.driver] = { driver: 0, helper: 0 };
+          personStats[row.driver].driver++;
+        }
+        row.helpers.forEach(h => {
+          if (!personStats[h]) personStats[h] = { driver: 0, helper: 0 };
+          personStats[h].helper++;
+        });
+      });
+
+      // Render Summary Table
+      summaryTableBody.innerHTML = "";
+      let sortedPersons = Object.keys(personStats);
+
+      if (selectedPerson !== "ALL") {
+        sortedPersons = sortedPersons.filter(p => p === selectedPerson);
+      }
+
+      sortedPersons.sort((a, b) => {
+        const totalA = personStats[a].driver + personStats[a].helper;
+        const totalB = personStats[b].driver + personStats[b].helper;
+        return totalB - totalA;
+      });
+
+      sortedPersons.forEach(person => {
+        const dCount = personStats[person].driver;
+        const hCount = personStats[person].helper;
+        const total = dCount + hCount;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${person}</strong></td>
+          <td>${dCount > 0 ? `<span class="badge badge-driver">${dCount}</span>` : '0'}</td>
+          <td>${hCount > 0 ? `<span class="badge badge-helper">${hCount}</span>` : '0'}</td>
+          <td><span class="count-pill">${total}</span></td>
+        `;
+        summaryTableBody.appendChild(tr);
+      });
+
+      // Render Detailed Logs
+      logTableBody.innerHTML = "";
+      if (filteredLogs.length === 0) {
+        emptyMessage.style.display = "block";
+      } else {
+        emptyMessage.style.display = "none";
+        filteredLogs.forEach(row => {
+          const tr = document.createElement("tr");
+          const helpersHTML = row.helpers.length > 0 
+            ? row.helpers.map(h => `<span class="badge badge-helper">${h}</span>`).join("")
+            : `<span style="color: #94a3b8;">—</span>`;
+
+          tr.innerHTML = `
+            <td><strong>${row.month}</strong></td>
+            <td><span class="badge badge-driver">${row.driver}</span></td>
+            <td>${helpersHTML}</td>
+          `;
+          logTableBody.appendChild(tr);
+        });
+      }
+
+      // Update Top Stat Cards
+      let totalDriverDuties = 0;
+      let totalHelperDuties = 0;
+
+      filteredLogs.forEach(row => {
+        if (selectedPerson === "ALL") {
+          if (row.driver) totalDriverDuties++;
+          totalHelperDuties += row.helpers.length;
+        } else {
+          if (row.driver === selectedPerson) totalDriverDuties++;
+          if (row.helpers.includes(selectedPerson)) totalHelperDuties++;
+        }
+      });
+
+      document.getElementById("statRows").textContent = filteredLogs.length;
+      document.getElementById("statDriverDuties").textContent = totalDriverDuties;
+      document.getElementById("statHelperDuties").textContent = totalHelperDuties;
+    }
+
+    // Export to Excel Functionality
+    function exportToExcel() {
+      const selectedMonth = document.getElementById("monthFilter").value;
+      const selectedPerson = document.getElementById("personFilter").value;
+
+      let filteredLogs = logs.filter(row => {
+        if (selectedMonth !== "ALL" && row.month !== selectedMonth) return false;
+        if (selectedPerson !== "ALL") {
+          return row.driver === selectedPerson || row.helpers.includes(selectedPerson);
+        }
+        return true;
+      });
+
+      // 1. Prepare Summary Sheet Data
+      const personStats = {};
+      filteredLogs.forEach(row => {
+        if (row.driver) {
+          if (!personStats[row.driver]) personStats[row.driver] = { driver: 0, helper: 0 };
+          personStats[row.driver].driver++;
+        }
+        row.helpers.forEach(h => {
+          if (!personStats[h]) personStats[h] = { driver: 0, helper: 0 };
+          personStats[h].helper++;
+        });
+      });
+
+      const summaryData = [
+        ["Personnel Name", "As Driver", "As Helper", "Total Appearances"]
+      ];
+
+      Object.keys(personStats).sort((a,b) => {
+        return (personStats[b].driver + personStats[b].helper) - (personStats[a].driver + personStats[a].helper);
+      }).forEach(person => {
+        const d = personStats[person].driver;
+        const h = personStats[person].helper;
+        summaryData.push([person, d, h, d + h]);
+      });
+
+      // 2. Prepare Detailed Logs Sheet Data
+      const logData = [
+        ["Month", "Driver", "Helpers"]
+      ];
+
+      filteredLogs.forEach(row => {
+        logData.push([
+          row.month,
+          row.driver,
+          row.helpers.join(", ") || "None"
+        ]);
+      });
+
+      // Create Workbook and Sheets
+      const wb = XLSX.utils.book_new();
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      const wsLogs = XLSX.utils.aoa_to_sheet(logData);
+
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Personnel Summary");
+      XLSX.utils.book_append_sheet(wb, wsLogs, "Schedule Logs");
+
+      // Save File
+      const filename = `Driver_Helper_Schedule_${selectedMonth}_${selectedPerson}.xlsx`.replace(/\s+/g, '_');
+      XLSX.writeFile(wb, filename);
+    }
+
+    document.getElementById("monthFilter").addEventListener("change", render);
+    document.getElementById("personFilter").addEventListener("change", render);
+    document.getElementById("exportBtn").addEventListener("click", exportToExcel);
+
+    populatePersonDropdown();
+    render();
+  </script>
+</body>
+</html>
