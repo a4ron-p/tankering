@@ -4,262 +4,229 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Driver Appearance Tracker</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Inter Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Phosphor Icons for UI Icons -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            mono: {
-              50: '#fafafa',
-              100: '#f4f4f5',
-              200: '#e4e4e7',
-              300: '#d4d4d8',
-              400: '#a1a1aa',
-              500: '#71717a',
-              600: '#52525b',
-              700: '#3f3f46',
-              800: '#27272a',
-              900: '#18181b',
-              950: '#09090b',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #ffffff;
-      color: #09090b;
-      -webkit-font-smoothing: antialiased;
-    }
-    
-    /* Custom Scrollbar for clean aesthetics */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #fafafa;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #d4d4d8;
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #a1a1aa;
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --border-color: #30363d;
+      --text-main: #c9d1d9;
+      --text-heading: #ffffff;
+      --accent-color: #2ea043;
+      --accent-hover: #3fb950;
     }
 
-    .focus-ring {
-      transition: all 0.15s ease;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
     }
-    .focus-ring:focus-within, .focus-ring:focus {
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    h1 {
+      color: var(--text-heading);
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+
+    p.subtitle {
+      color: #8b949e;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: var(--card-bg);
+      padding: 1.25rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    select {
+      background-color: #21262d;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
       outline: none;
-      border-color: #09090b;
-      box-shadow: 0 0 0 1px #09090b;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: var(--accent-color);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+
+    .stat-card .label {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-top: 0.25rem;
+    }
+
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.8rem 1.2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: #21262d;
+      color: var(--text-heading);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      background-color: rgba(46, 160, 67, 0.15);
+      color: var(--accent-color);
+      padding: 0.25rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: #8b949e;
     }
   </style>
 </head>
-<body class="min-h-screen bg-white text-mono-950 flex flex-col justify-between selection:bg-mono-950 selection:text-white">
+<body>
 
-  <!-- Main Wrapper -->
-  <div class="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
-    
-    <!-- Top Header -->
-    <header class="border-b border-mono-200 pb-6 mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-      <div>
-        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-mono-100 text-mono-700 mb-3 border border-mono-200">
-          <i class="ph ph-calendar-blank text-sm"></i> Schedule Analytics
-        </div>
-        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-mono-950">Driver Appearance Tracker</h1>
-        <p class="text-mono-500 text-sm sm:text-base mt-1">Minimalist driver dispatch logs and assignment performance (Jan – Oct)</p>
-      </div>
-      
-      <!-- Right Action / Status -->
-      <div class="flex items-center gap-3 text-xs font-medium text-mono-500">
-        <span class="inline-block w-2 h-2 rounded-full bg-mono-950 animate-pulse"></span>
-        <span>Dataset Active • 10 Months Loaded</span>
-      </div>
-    </header>
+  <div class="container">
+    <h1>Driver Appearance Tracker</h1>
+    <p class="subtitle">Monthly driver schedule summary (January - October)</p>
 
-    <!-- Stats Section -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" aria-label="Key Performance Metrics">
-      
-      <!-- Total Appearances -->
-      <div class="p-6 rounded-xl bg-mono-50 border border-mono-200 transition-all hover:border-mono-400">
-        <div class="flex items-center justify-between text-mono-500 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider">Total Appearances</span>
-          <i class="ph ph-list-numbers text-xl text-mono-950"></i>
-        </div>
-        <div class="text-3xl sm:text-4xl font-extrabold tracking-tight text-mono-950" id="statTotalCount">0</div>
-        <p class="text-xs text-mono-500 mt-2" id="statTotalPeriod">Calculated across selected filters</p>
+    <div class="controls">
+      <div class="control-group">
+        <label for="monthFilter">Select Month</label>
+        <select id="monthFilter">
+          <option value="ALL">All Months (Jan - Oct)</option>
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+        </select>
       </div>
 
-      <!-- Unique Active Drivers -->
-      <div class="p-6 rounded-xl bg-mono-50 border border-mono-200 transition-all hover:border-mono-400">
-        <div class="flex items-center justify-between text-mono-500 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider">Unique Drivers</span>
-          <i class="ph ph-users text-xl text-mono-950"></i>
-        </div>
-        <div class="text-3xl sm:text-4xl font-extrabold tracking-tight text-mono-950" id="statUniqueDrivers">0</div>
-        <p class="text-xs text-mono-500 mt-2">Active drivers in selected range</p>
+      <div class="control-group">
+        <label for="driverFilter">Filter by Driver</label>
+        <select id="driverFilter">
+          <option value="ALL">All Drivers</option>
+        </select>
       </div>
+    </div>
 
-      <!-- Top Performing Driver -->
-      <div class="p-6 rounded-xl bg-mono-50 border border-mono-200 transition-all hover:border-mono-400">
-        <div class="flex items-center justify-between text-mono-500 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider">Most Frequent Driver</span>
-          <i class="ph ph-crown text-xl text-mono-950"></i>
-        </div>
-        <div class="text-2xl sm:text-3xl font-extrabold tracking-tight text-mono-950 truncate" id="statTopDriver">--</div>
-        <p class="text-xs text-mono-500 mt-2" id="statTopDriverCount">0 total shifts in period</p>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="value" id="totalAppearances">0</div>
+        <div class="label" id="appearancesLabel">Total Driver Appearances</div>
       </div>
-
-    </section>
-
-    <!-- Controls & Filter Toolbar -->
-    <section class="bg-mono-50 border border-mono-200 rounded-xl p-4 sm:p-5 mb-8 space-y-4">
-      
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        
-        <!-- Search Input -->
-        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
-          <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-mono-400 text-lg"></i>
-          <input 
-            type="text" 
-            id="searchInput" 
-            placeholder="Search driver name..." 
-            class="w-full pl-9 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 placeholder:text-mono-400"
-          />
-          <button id="clearSearch" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-mono-400 hover:text-mono-950 text-sm p-1">
-            <i class="ph ph-x-circle-fill"></i>
-          </button>
-        </div>
-
-        <!-- Month Filter Dropdown -->
-        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
-          <select id="monthFilter" class="w-full pl-3 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 appearance-none cursor-pointer">
-            <option value="ALL">All Months (Jan - Oct)</option>
-            <option value="January">January</option>
-            <option value="February">February</option>
-            <option value="March">March</option>
-            <option value="April">April</option>
-            <option value="May">May</option>
-            <option value="June">June</option>
-            <option value="July">July</option>
-            <option value="August">August</option>
-            <option value="September">September</option>
-            <option value="October">October</option>
-          </select>
-          <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-mono-400 pointer-events-none text-sm"></i>
-        </div>
-
-        <!-- Driver Filter Dropdown -->
-        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
-          <select id="driverFilter" class="w-full pl-3 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 appearance-none cursor-pointer">
-            <option value="ALL">All Drivers</option>
-          </select>
-          <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-mono-400 pointer-events-none text-sm"></i>
-        </div>
-
-        <!-- Sort Control -->
-        <div class="relative focus-ring rounded-lg border border-mono-300 bg-white">
-          <select id="sortFilter" class="w-full pl-3 pr-8 py-2.5 text-sm bg-transparent border-none rounded-lg focus:outline-none text-mono-900 appearance-none cursor-pointer">
-            <option value="count-desc">Sort: Count (High to Low)</option>
-            <option value="count-asc">Sort: Count (Low to High)</option>
-            <option value="name-asc">Sort: Name (A – Z)</option>
-            <option value="name-desc">Sort: Name (Z – A)</option>
-          </select>
-          <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-mono-400 pointer-events-none text-sm"></i>
-        </div>
-
+      <div class="stat-card">
+        <div class="value" id="activeDrivers">0</div>
+        <div class="label">Unique Drivers Listed</div>
       </div>
+    </div>
 
-      <!-- Secondary Toolbar Row: View Mode Toggle & Reset -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-mono-200/80 text-xs font-medium">
-        
-        <!-- View Breakdown Mode Toggle -->
-        <div class="inline-flex rounded-lg border border-mono-300 p-0.5 bg-white">
-          <button id="viewSummaryBtn" class="px-3 py-1.5 rounded-md text-mono-950 font-semibold bg-mono-100 transition-all flex items-center gap-1.5">
-            <i class="ph ph-chart-bar text-sm"></i> Summary Aggregated
-          </button>
-          <button id="viewDetailedBtn" class="px-3 py-1.5 rounded-md text-mono-500 hover:text-mono-950 transition-all flex items-center gap-1.5">
-            <i class="ph ph-list-dashes text-sm"></i> Monthly Detailed Breakdown
-          </button>
-        </div>
-
-        <!-- Filter Count & Reset Button -->
-        <div class="flex items-center gap-4">
-          <span class="text-mono-500" id="resultCounter">Showing 0 entries</span>
-          <button id="resetFiltersBtn" class="text-mono-500 hover:text-mono-950 hover:underline flex items-center gap-1 transition-colors">
-            <i class="ph ph-arrow-counter-clockwise"></i> Reset Filters
-          </button>
-        </div>
-
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Driver Name</th>
+            <th>Month</th>
+            <th>Appearances</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Populated dynamically via JS -->
+        </tbody>
+      </table>
+      <div id="emptyMessage" class="empty-state" style="display: none;">
+        No data found for the selected filters.
       </div>
-
-    </section>
-
-    <!-- Table Presentation -->
-    <section class="bg-white border border-mono-200 rounded-xl overflow-hidden shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm border-collapse">
-          <thead>
-            <tr class="bg-mono-50 border-b border-mono-200 text-mono-600 uppercase text-[11px] font-semibold tracking-wider">
-              <th scope="col" class="py-3.5 px-5">#</th>
-              <th scope="col" class="py-3.5 px-5">Driver Name</th>
-              <th scope="col" class="py-3.5 px-5" id="thMonthHeader">Month</th>
-              <th scope="col" class="py-3.5 px-5 text-right">Appearances</th>
-              <th scope="col" class="py-3.5 px-5 text-right">Percentage</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody" class="divide-y divide-mono-100">
-            <!-- Dynamic Rows Generated Here -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Empty State Indicator -->
-      <div id="emptyState" class="hidden py-16 px-4 text-center">
-        <div class="inline-flex justify-center items-center w-12 h-12 rounded-full bg-mono-100 text-mono-400 mb-3">
-          <i class="ph ph-magnifying-glass text-2xl"></i>
-        </div>
-        <h3 class="text-base font-semibold text-mono-900">No matching drivers found</h3>
-        <p class="text-xs text-mono-500 max-w-sm mx-auto mt-1">Try adjusting your search term, changing the selected month, or clearing current filters.</p>
-        <button id="emptyStateResetBtn" class="mt-4 px-4 py-2 bg-mono-950 text-white rounded-lg text-xs font-semibold hover:bg-mono-800 transition-all">
-          Clear All Filters
-        </button>
-      </div>
-    </section>
-
+    </div>
   </div>
 
-  <!-- Minimal Footer -->
-  <footer class="border-t border-mono-200 py-6 text-center text-xs text-mono-500 mt-12 bg-white">
-    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p>© 2026 Driver Appearance Analytics • Clean Monochrome Interface</p>
-      <p class="font-mono text-[11px] text-mono-400">Dataset: Jan - Oct Schedule Log</p>
-    </div>
-  </footer>
-
-  <!-- Application Logic -->
   <script>
-    // Complete Master Dataset (Jan - Oct)
-    const dataset = [
+    // Raw dataset extracted from schedule logs
+    const rawData = [
       // January
       { month: "January", driver: "Efren Lira", count: 5 },
       { month: "January", driver: "Emanuel Dela Rosa", count: 3 },
@@ -388,224 +355,98 @@
       { month: "October", driver: "Edgar Martinez", count: 1 }
     ];
 
-    // State Management
-    let currentViewMode = "summary"; // 'summary' or 'detailed'
-
-    // DOM References
-    const searchInput = document.getElementById("searchInput");
-    const clearSearchBtn = document.getElementById("clearSearch");
-    const monthFilter = document.getElementById("monthFilter");
-    const driverFilter = document.getElementById("driverFilter");
-    const sortFilter = document.getElementById("sortFilter");
-    const tableBody = document.getElementById("tableBody");
-    const emptyState = document.getElementById("emptyState");
-    const thMonthHeader = document.getElementById("thMonthHeader");
-    const resultCounter = document.getElementById("resultCounter");
-
-    const statTotalCount = document.getElementById("statTotalCount");
-    const statTotalPeriod = document.getElementById("statTotalPeriod");
-    const statUniqueDrivers = document.getElementById("statUniqueDrivers");
-    const statTopDriver = document.getElementById("statTopDriver");
-    const statTopDriverCount = document.getElementById("statTopDriverCount");
-
-    const viewSummaryBtn = document.getElementById("viewSummaryBtn");
-    const viewDetailedBtn = document.getElementById("viewDetailedBtn");
-    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
-    const emptyStateResetBtn = document.getElementById("emptyStateResetBtn");
-
-    // Initialize Driver Filter Dropdown
-    function initDriverDropdown() {
-      const uniqueDrivers = [...new Set(dataset.map(item => item.driver))].sort();
-      driverFilter.innerHTML = '<option value="ALL">All Drivers</option>';
+    // Populate Driver Filter Dropdown
+    function populateDriverDropdown() {
+      const driverSelect = document.getElementById("driverFilter");
+      const uniqueDrivers = [...new Set(rawData.map(item => item.driver))].sort();
+      
       uniqueDrivers.forEach(driver => {
-        const opt = document.createElement("option");
-        opt.value = driver;
-        opt.textContent = driver;
-        driverFilter.appendChild(opt);
+        const option = document.createElement("option");
+        option.value = driver;
+        option.textContent = driver;
+        driverSelect.appendChild(option);
       });
     }
 
-    // Main Filter & Render Logic
+    // Render Table and Summary Stats
     function render() {
-      const searchTerm = searchInput.value.trim().toLowerCase();
-      const selectedMonth = monthFilter.value;
-      const selectedDriver = driverFilter.value;
-      const selectedSort = sortFilter.value;
+      const monthFilter = document.getElementById("monthFilter").value;
+      const driverFilter = document.getElementById("driverFilter").value;
+      const tableBody = document.getElementById("tableBody");
+      const emptyMessage = document.getElementById("emptyMessage");
 
-      // Show/Hide search clear icon
-      if (searchTerm.length > 0) {
-        clearSearchBtn.classList.remove("hidden");
-      } else {
-        clearSearchBtn.classList.add("hidden");
-      }
-
-      // 1. Filter raw dataset
-      let filtered = dataset.filter(item => {
-        const matchSearch = item.driver.toLowerCase().includes(searchTerm);
-        const matchMonth = (selectedMonth === "ALL") || (item.month === selectedMonth);
-        const matchDriver = (selectedDriver === "ALL") || (item.driver === selectedDriver);
-        return matchSearch && matchMonth && matchDriver;
+      // Filter logic
+      let filtered = rawData.filter(item => {
+        const matchMonth = (monthFilter === "ALL") || (item.month === monthFilter);
+        const matchDriver = (driverFilter === "ALL") || (item.driver === driverFilter);
+        return matchMonth && matchDriver;
       });
 
-      // 2. Compute Dashboard Analytics
-      const totalAppearances = filtered.reduce((acc, curr) => acc + curr.count, 0);
-      const uniqueDriversInFilter = [...new Set(filtered.map(i => i.driver))];
-      
-      // Calculate Most Frequent Driver
-      const driverCountsMap = {};
-      filtered.forEach(item => {
-        driverCountsMap[item.driver] = (driverCountsMap[item.driver] || 0) + item.count;
-      });
+      // If viewing ALL months with ALL drivers (or filtering by driver across months), 
+      // aggregate totals per driver or keep per month depending on month selection
+      let displayData = [];
 
-      let topDriverName = "--";
-      let topDriverVal = 0;
-      Object.entries(driverCountsMap).forEach(([driver, val]) => {
-        if (val > topDriverVal) {
-          topDriverVal = val;
-          topDriverName = driver;
-        }
-      });
-
-      // Update Dashboard Cards
-      statTotalCount.textContent = totalAppearances;
-      statTotalPeriod.textContent = selectedMonth === "ALL" ? "Total for Jan – Oct" : `Total for ${selectedMonth}`;
-      statUniqueDrivers.textContent = uniqueDriversInFilter.length;
-      statTopDriver.textContent = topDriverName;
-      statTopDriverCount.textContent = topDriverVal > 0 ? `${topDriverVal} total shifts in range` : "No activity";
-
-      // 3. Prepare Display Rows based on View Mode
-      let displayRows = [];
-
-      if (currentViewMode === "summary") {
-        thMonthHeader.textContent = "Period";
-        // Aggregate totals by driver
-        const aggregated = {};
+      if (monthFilter === "ALL" && driverFilter === "ALL") {
+        // Aggregate totals across all months
+        const totalsMap = {};
         filtered.forEach(item => {
-          if (!aggregated[item.driver]) {
-            aggregated[item.driver] = 0;
-          }
-          aggregated[item.driver] += item.count;
+          totalsMap[item.driver] = (totalsMap[item.driver] || 0) + item.count;
         });
-
-        const periodLabel = selectedMonth === "ALL" ? "Jan – Oct" : selectedMonth;
-        displayRows = Object.keys(aggregated).map(driver => ({
+        
+        displayData = Object.keys(totalsMap).map(driver => ({
           driver: driver,
-          month: periodLabel,
-          count: aggregated[driver]
+          month: "Jan - Oct Total",
+          count: totalsMap[driver]
+        })).sort((a, b) => b.count - a.count);
+
+      } else if (monthFilter === "ALL" && driverFilter !== "ALL") {
+        // Show row per month for specific driver
+        displayData = filtered.map(item => ({
+          driver: item.driver,
+          month: item.month,
+          count: item.count
         }));
       } else {
-        thMonthHeader.textContent = "Month";
-        // Detailed row by row view
-        displayRows = filtered.map(item => ({ ...item }));
+        // Specific month view
+        displayData = filtered.sort((a, b) => b.count - a.count);
       }
 
-      // 4. Sort display rows
-      displayRows.sort((a, b) => {
-        if (selectedSort === "count-desc") return b.count - a.count || a.driver.localeCompare(b.driver);
-        if (selectedSort === "count-asc") return a.count - b.count || a.driver.localeCompare(b.driver);
-        if (selectedSort === "name-asc") return a.driver.localeCompare(b.driver);
-        if (selectedSort === "name-desc") return b.driver.localeCompare(a.driver);
-        return 0;
-      });
-
-      // Update Result Counter
-      resultCounter.textContent = `Showing ${displayRows.length} ${displayRows.length === 1 ? 'entry' : 'entries'}`;
-
-      // 5. Render Table HTML
+      // Update UI elements
       tableBody.innerHTML = "";
-
-      if (displayRows.length === 0) {
-        emptyState.classList.remove("hidden");
+      
+      if (displayData.length === 0) {
+        emptyMessage.style.display = "block";
       } else {
-        emptyState.classList.add("hidden");
-
-        displayRows.forEach((row, index) => {
-          const percentage = totalAppearances > 0 ? ((row.count / totalAppearances) * 100).toFixed(1) : "0.0";
+        emptyMessage.style.display = "none";
+        displayData.forEach(item => {
           const tr = document.createElement("tr");
-          tr.className = "hover:bg-mono-50/80 transition-colors group";
-
           tr.innerHTML = `
-            <td class="py-3.5 px-5 text-mono-400 font-mono text-xs w-12">${index + 1}</td>
-            <td class="py-3.5 px-5 font-semibold text-mono-950 group-hover:text-black">
-              ${escapeHtml(row.driver)}
-            </td>
-            <td class="py-3.5 px-5 text-mono-500 font-medium text-xs">
-              <span class="inline-block px-2 py-0.5 rounded bg-mono-100 text-mono-700 border border-mono-200">
-                ${escapeHtml(row.month)}
-              </span>
-            </td>
-            <td class="py-3.5 px-5 text-right font-mono font-bold text-mono-950">
-              <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs bg-mono-950 text-white font-semibold">
-                ${row.count}
-              </span>
-            </td>
-            <td class="py-3.5 px-5 text-right text-mono-500 font-mono text-xs">
-              ${percentage}%
-            </td>
+            <td><strong>${item.driver}</strong></td>
+            <td>${item.month}</td>
+            <td><span class="badge">${item.count}</span></td>
           `;
-
           tableBody.appendChild(tr);
         });
       }
+
+      // Update Cards
+      const grandTotal = filtered.reduce((sum, item) => sum + item.count, 0);
+      const uniqueDriversCount = new Set(filtered.map(i => i.driver)).size;
+
+      document.getElementById("totalAppearances").textContent = grandTotal;
+      document.getElementById("activeDrivers").textContent = uniqueDriversCount;
+      document.getElementById("appearancesLabel").textContent = 
+        monthFilter === "ALL" ? "Total Appearances (Jan-Oct)" : `Appearances in ${monthFilter}`;
     }
 
-    // Utility: XSS Protection
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, function(m) {
-        return {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#039;'
-        }[m];
-      });
-    }
+    // Attach Event Listeners
+    document.getElementById("monthFilter").addEventListener("change", render);
+    document.getElementById("driverFilter").addEventListener("change", render);
 
-    // Reset All Filters
-    function resetFilters() {
-      searchInput.value = "";
-      monthFilter.value = "ALL";
-      driverFilter.value = "ALL";
-      sortFilter.value = "count-desc";
-      render();
-    }
-
-    // Toggle View Mode
-    function setViewMode(mode) {
-      currentViewMode = mode;
-      if (mode === "summary") {
-        viewSummaryBtn.className = "px-3 py-1.5 rounded-md text-mono-950 font-semibold bg-mono-100 transition-all flex items-center gap-1.5";
-        viewDetailedBtn.className = "px-3 py-1.5 rounded-md text-mono-500 hover:text-mono-950 transition-all flex items-center gap-1.5";
-      } else {
-        viewDetailedBtn.className = "px-3 py-1.5 rounded-md text-mono-950 font-semibold bg-mono-100 transition-all flex items-center gap-1.5";
-        viewSummaryBtn.className = "px-3 py-1.5 rounded-md text-mono-500 hover:text-mono-950 transition-all flex items-center gap-1.5";
-      }
-      render();
-    }
-
-    // Event Listeners
-    searchInput.addEventListener("input", render);
-    clearSearchBtn.addEventListener("click", () => {
-      searchInput.value = "";
-      render();
-    });
-
-    monthFilter.addEventListener("change", render);
-    driverFilter.addEventListener("change", render);
-    sortFilter.addEventListener("change", render);
-
-    viewSummaryBtn.addEventListener("click", () => setViewMode("summary"));
-    viewDetailedBtn.addEventListener("click", () => setViewMode("detailed"));
-
-    resetFiltersBtn.addEventListener("click", resetFilters);
-    emptyStateResetBtn.addEventListener("click", resetFilters);
-
-    // Initial Load Execution
-    window.addEventListener("DOMContentLoaded", () => {
-      initDriverDropdown();
-      render();
-    });
+    // Initial Execution
+    populateDriverDropdown();
+    render();
   </script>
+
 </body>
 </html>
