@@ -3,138 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Driver Appearance Tracker</title>
+  <title>Driver & Helper Schedule Tracker</title>
   <style>
     :root {
-      --bg-color: #0d1117;
-      --card-bg: #161b22;
-      --border-color: #30363d;
-      --text-main: #c9d1d9;
-      --text-heading: #ffffff;
-      --accent-color: #2ea043;
-      --accent-hover: #3fb950;
+      --bg-color: #000000;
+      --card-bg: #0a0a0a;
+      --border-color: #222222;
+      --border-hover: #444444;
+      --text-main: #ffffff;
+      --text-muted: #888888;
+      --pill-bg: #111111;
+      --driver-color: #ffffff;
+      --helper-color: #aaaaaa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-main);
-      margin: 0;
-      padding: 2rem;
+      padding: 2.5rem 1.5rem;
       display: flex;
       justify-content: center;
+      min-height: 100vh;
     }
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 960px;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
     }
 
     h1 {
-      color: var(--text-heading);
-      margin-bottom: 0.5rem;
-      font-size: 1.8rem;
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
     }
 
     p.subtitle {
-      color: #8b949e;
-      margin-bottom: 1.5rem;
-      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
     }
 
     .controls {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      flex-wrap: wrap;
-      background: var(--card-bg);
-      padding: 1.25rem;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .control-group {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
-      flex: 1;
-      min-width: 200px;
+      gap: 0.5rem;
     }
 
     label {
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #8b949e;
+      color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.08em;
     }
 
     select {
-      background-color: #21262d;
+      background-color: var(--card-bg);
       color: var(--text-main);
       border: 1px solid var(--border-color);
-      padding: 0.6rem 0.8rem;
-      border-radius: 6px;
-      font-size: 0.95rem;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
       outline: none;
       cursor: pointer;
+      transition: border-color 0.2s ease;
+      width: 100%;
     }
 
-    select:focus {
-      border-color: var(--accent-color);
+    select:focus, select:hover {
+      border-color: var(--border-hover);
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .stat-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1rem;
+      border-radius: 4px;
+      padding: 1.25rem 1rem;
       text-align: center;
     }
 
     .stat-card .value {
-      font-size: 2rem;
-      font-weight: bold;
-      color: var(--accent-color);
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
     }
 
     .stat-card .label {
-      font-size: 0.85rem;
-      color: #8b949e;
-      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .table-container {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      overflow: hidden;
+      border-radius: 4px;
+      overflow-x: auto;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-    }
-
-    th, td {
-      padding: 0.8rem 1.2rem;
-      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
     }
 
     th {
-      background-color: #21262d;
-      color: var(--text-heading);
-      font-size: 0.85rem;
+      background-color: #050505;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.08em;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
     }
 
     tr:last-child td {
@@ -142,37 +159,68 @@
     }
 
     tr:hover td {
-      background-color: rgba(255, 255, 255, 0.02);
+      background-color: #111111;
     }
 
-    .badge {
-      background-color: rgba(46, 160, 67, 0.15);
-      color: var(--accent-color);
-      padding: 0.25rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
+    .person-badge {
       display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      border: 1px solid var(--border-color);
+      background: var(--pill-bg);
+      margin-right: 0.35rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .driver-badge {
+      color: var(--driver-color);
+      border-color: #444444;
+    }
+
+    .helper-badge {
+      color: var(--helper-color);
+    }
+
+    .role-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .tag-driver {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .tag-helper {
+      border: 1px solid #444444;
+      color: #aaaaaa;
     }
 
     .empty-state {
-      padding: 2rem;
+      padding: 3rem;
       text-align: center;
-      color: #8b949e;
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>Driver Appearance Tracker</h1>
-    <p class="subtitle">Monthly driver schedule summary (January - October)</p>
+    <header>
+      <h1>Driver & Helper Schedule Tracker</h1>
+      <p class="subtitle">January – October Schedule Analysis (1st Person = Driver, Subsequent = Helpers)</p>
+    </header>
 
     <div class="controls">
       <div class="control-group">
-        <label for="monthFilter">Select Month</label>
+        <label for="monthFilter">Month Filter</label>
         <select id="monthFilter">
-          <option value="ALL">All Months (Jan - Oct)</option>
+          <option value="ALL">All Months (Jan – Oct)</option>
           <option value="January">January</option>
           <option value="February">February</option>
           <option value="March">March</option>
@@ -187,31 +235,44 @@
       </div>
 
       <div class="control-group">
-        <label for="driverFilter">Filter by Driver</label>
-        <select id="driverFilter">
-          <option value="ALL">All Drivers</option>
+        <label for="personFilter">Person Filter</label>
+        <select id="personFilter">
+          <option value="ALL">All Personnel</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="roleFilter">Role Filter</label>
+        <select id="roleFilter">
+          <option value="ALL">Both Roles</option>
+          <option value="Driver">Driver Only</option>
+          <option value="Helper">Helper Only</option>
         </select>
       </div>
     </div>
 
     <div class="stats">
       <div class="stat-card">
-        <div class="value" id="totalAppearances">0</div>
-        <div class="label" id="appearancesLabel">Total Driver Appearances</div>
+        <div class="value" id="statRows">0</div>
+        <div class="label">Total Trips / Rows</div>
       </div>
       <div class="stat-card">
-        <div class="value" id="activeDrivers">0</div>
-        <div class="label">Unique Drivers Listed</div>
+        <div class="value" id="statDrivers">0</div>
+        <div class="label">Driver Duty Count</div>
+      </div>
+      <div class="stat-card">
+        <div class="value" id="statHelpers">0</div>
+        <div class="label">Helper Duty Count</div>
       </div>
     </div>
 
     <div class="table-container">
       <table>
         <thead>
-          <tr>
-            <th>Driver Name</th>
+          <tr id="tableHeader">
             <th>Month</th>
-            <th>Appearances</th>
+            <th>Driver (1st Listed)</th>
+            <th>Helper(s)</th>
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -219,234 +280,229 @@
         </tbody>
       </table>
       <div id="emptyMessage" class="empty-state" style="display: none;">
-        No data found for the selected filters.
+        No records found for the selected filters.
       </div>
     </div>
   </div>
 
   <script>
-    // Raw dataset extracted from schedule logs
-    const rawData = [
+    // Full raw log data per month (1st = Driver, subsequent = Helpers)
+    const logs = [
       // January
-      { month: "January", driver: "Efren Lira", count: 5 },
-      { month: "January", driver: "Emanuel Dela Rosa", count: 3 },
-      { month: "January", driver: "Den Harold Ganacan", count: 3 },
-      { month: "January", driver: "Edgar Martinez", count: 2 },
-      { month: "January", driver: "Fredie Batalla", count: 2 },
-      { month: "January", driver: "Alex Abucayon", count: 2 },
-      { month: "January", driver: "SRBW Utility", count: 1 },
-      { month: "January", driver: "Genesis Almodovar", count: 1 },
-      { month: "January", driver: "Jomer Malejan", count: 1 },
-      { month: "January", driver: "Exiel Bienvenido", count: 1 },
-      { month: "January", driver: "Marvin Cruz", count: 1 },
+      { month: "January", driver: "Edgar Martinez", helpers: [] },
+      { month: "January", driver: "Efren Lira", helpers: ["Fredie Batalla"] },
+      { month: "January", driver: "Den Harold", helpers: ["SRBW Utility"] },
+      { month: "January", driver: "Genesis Almodovar", helpers: ["Emanuel Dela Rosa"] },
+      { month: "January", driver: "Efren Lira", helpers: ["Emanuel Dela Rosa"] },
+      { month: "January", driver: "Alex Abucayon", helpers: ["Jomer Malejan"] },
+      { month: "January", driver: "Den Harold Ganacan", helpers: [] },
+      { month: "January", driver: "Efren Lira", helpers: ["Alex Abucayon"] },
+      { month: "January", driver: "Den Ganacan", helpers: ["Exiel Bienvenido"] },
+      { month: "January", driver: "Efren Lira", helpers: ["Edgar Martinez"] },
+      { month: "January", driver: "Fredie Batalla", helpers: ["Marvin Cruz"] },
+      { month: "January", driver: "Efren Lira", helpers: ["Emanuel Dela Rosa"] },
 
       // February
-      { month: "February", driver: "Helbert Magistrado", count: 3 },
-      { month: "February", driver: "Efren Lira", count: 2 },
-      { month: "February", driver: "Fredie Batalla", count: 2 },
-      { month: "February", driver: "Genesis Almodovar", count: 1 },
-      { month: "February", driver: "Alvin Pamplona", count: 1 },
-      { month: "February", driver: "Emanuel Dela Rosa", count: 1 },
-      { month: "February", driver: "Alex Abucayon", count: 1 },
-      { month: "February", driver: "Reynaldo Untulan", count: 1 },
+      { month: "February", driver: "Efren Lira", helpers: ["Genesis Almodovar"] },
+      { month: "February", driver: "Efren Lira", helpers: ["Helbert Magistrado"] },
+      { month: "February", driver: "Helbert Magistrado", helpers: ["Alvin Pamplona"] },
+      { month: "February", driver: "Fredie Batalla", helpers: ["Emanuel Dela Rosa"] },
+      { month: "February", driver: "Helbert Magistrado", helpers: ["Alex Abucayon"] },
+      { month: "February", driver: "Fredie Batalla", helpers: ["Reynaldo Untulan"] },
 
       // March
-      { month: "March", driver: "Jomer Malejan", count: 4 },
-      { month: "March", driver: "Demmy Cabrera", count: 3 },
-      { month: "March", driver: "Emanuel Dela Rosa", count: 3 },
-      { month: "March", driver: "Welen Serrano", count: 2 },
-      { month: "March", driver: "Jether Jake Eglip", count: 2 },
-      { month: "March", driver: "Edgar Martinez", count: 2 },
-      { month: "March", driver: "Reynaldo Untulan", count: 2 },
-      { month: "March", driver: "Efren Lira", count: 1 },
-      { month: "March", driver: "Alex Abucayon", count: 1 },
-      { month: "March", driver: "Michael Silvestre", count: 1 },
-      { month: "March", driver: "Leo Obsequio", count: 1 },
-      { month: "March", driver: "Marvin Cruz", count: 1 },
-      { month: "March", driver: "Danilo Naanod", count: 1 },
-      { month: "March", driver: "Fredie Batalla", count: 1 },
-      { month: "March", driver: "Kenwyn Mangahis", count: 1 },
-      { month: "March", driver: "Anthony Bacong", count: 1 },
-      { month: "March", driver: "Joriel Martinez", count: 1 },
-      { month: "March", driver: "Genesis Almodovar", count: 1 },
-      { month: "March", driver: "Bryan Navarro", count: 1 },
-      { month: "March", driver: "Carlo Abag", count: 1 },
+      { month: "March", driver: "Efren Lira", helpers: ["Alex Abucayon"] },
+      { month: "March", driver: "Michael Silvestre", helpers: [] },
+      { month: "March", driver: "Welen Serrano", helpers: ["Jether Jake Eglip"] },
+      { month: "March", driver: "Leo Obsequio", helpers: ["Marvin Cruz", "Reynaldo Untulan"] },
+      { month: "March", driver: "Edgar Martinez", helpers: ["Danilo Naanod"] },
+      { month: "March", driver: "Welen Serrano", helpers: ["Jether Jake Eglip"] },
+      { month: "March", driver: "Freddie Batalla", helpers: [] },
+      { month: "March", driver: "Edgar Martinez", helpers: [] },
+      { month: "March", driver: "Kenwyn Mangahis", helpers: [] },
+      { month: "March", driver: "Anthony Bacong", helpers: [] },
+      { month: "March", driver: "Enviro Joriel Martinez", helpers: [] },
+      { month: "March", driver: "Jomer Malijan", helpers: [] },
+      { month: "March", driver: "Genesis Almodovar", helpers: [] },
+      { month: "March", driver: "Jomer Malejan", helpers: [] },
+      { month: "March", driver: "Enviro Demmy Cabrera", helpers: [] },
+      { month: "March", driver: "Reynaldo Untolan", helpers: [] },
+      { month: "March", driver: "Enviro Bryan Navarro", helpers: [] },
+      { month: "March", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "March", driver: "Enviro Carlo Abag", helpers: [] },
+      { month: "March", driver: "Jomer Malejan", helpers: [] },
+      { month: "March", driver: "Enviro Demmy Cabrera", helpers: [] },
+      { month: "March", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "March", driver: "Enviro Demmy Cabrera", helpers: [] },
+      { month: "March", driver: "Emanuel Dela Rosa", helpers: [] },
 
       // April
-      { month: "April", driver: "Helbert Magistrado", count: 1 },
-      { month: "April", driver: "Emanuel Dela Rosa", count: 1 },
+      { month: "April", driver: "Helbert Magistrado", helpers: [] },
+      { month: "April", driver: "Emanuel Dela Rosa", helpers: [] },
 
       // May
-      { month: "May", driver: "Emanuel Dela Rosa", count: 2 },
-      { month: "May", driver: "Edgar Martinez", count: 2 },
-      { month: "May", driver: "Fredie Batalla", count: 1 },
-      { month: "May", driver: "Marvin Cruz", count: 1 },
-      { month: "May", driver: "Christopher Panes", count: 1 },
-      { month: "May", driver: "Jomer Malejan", count: 1 },
-      { month: "May", driver: "Efren Lira", count: 1 },
+      { month: "May", driver: "Fredie Batalla", helpers: [] },
+      { month: "May", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "May", driver: "Edgar Martinez", helpers: [] },
+      { month: "May", driver: "Marvin Cruz", helpers: [] },
+      { month: "May", driver: "Christopher Panes", helpers: [] },
+      { month: "May", driver: "Edgar Martinez", helpers: [] },
+      { month: "May", driver: "Jomer Malejan", helpers: [] },
+      { month: "May", driver: "Efren Lira", helpers: [] },
+      { month: "May", driver: "Emanuel Dela Rosa", helpers: [] },
 
       // June
-      { month: "June", driver: "Carlo Abag", count: 1 },
-      { month: "June", driver: "Demmy Cabrera", count: 1 },
-      { month: "June", driver: "Helbert Magistrado", count: 1 },
-      { month: "June", driver: "Emanuel Dela Rosa", count: 1 },
+      { month: "June", driver: "Carlo Abag", helpers: [] },
+      { month: "June", driver: "Demmy Cabrera", helpers: [] },
+      { month: "June", driver: "Helbert Magistrado", helpers: [] },
+      { month: "June", driver: "Emanuel Dela Rosa", helpers: [] },
 
       // July
-      { month: "July", driver: "Fredie Batalla", count: 2 },
-      { month: "July", driver: "Jomer Malejan", count: 2 },
-      { month: "July", driver: "Emanuel Dela Rosa", count: 2 },
-      { month: "July", driver: "Demmy Cabrera", count: 1 },
-      { month: "July", driver: "Joriel Martinez", count: 1 },
-      { month: "July", driver: "Carlo Abag", count: 1 },
-      { month: "July", driver: "Efren Lira", count: 1 },
-      { month: "July", driver: "Genesis Almodovar", count: 1 },
-      { month: "July", driver: "Brandy Waste Water", count: 1 },
-      { month: "July", driver: "Marvin Cruz", count: 1 },
-      { month: "July", driver: "Renato Maictin", count: 1 },
-      { month: "July", driver: "Edgar Martinez", count: 1 },
+      { month: "July", driver: "Demmy Cabrera", helpers: [] },
+      { month: "July", driver: "Joriel Martinez", helpers: [] },
+      { month: "July", driver: "Carlo Abag", helpers: [] },
+      { month: "July", driver: "Fredie Batalla", helpers: [] },
+      { month: "July", driver: "Jomer Malejan", helpers: [] },
+      { month: "July", driver: "Efren Lira", helpers: [] },
+      { month: "July", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "July", driver: "Fredie Batalla", helpers: [] },
+      { month: "July", driver: "Jomer Malejan", helpers: [] },
+      { month: "July", driver: "Genesis Almodovar", helpers: [] },
+      { month: "July", driver: "Brandy Waste Water", helpers: [] },
+      { month: "July", driver: "Marvin Cruz", helpers: ["Renato Maictin"] },
+      { month: "July", driver: "Edgar Martinez", helpers: ["Emmanuel Dela Rosa"] },
 
       // August
-      { month: "August", driver: "Edgar Martinez", count: 3 },
-      { month: "August", driver: "Renato Maictin", count: 3 },
-      { month: "August", driver: "Efren Lira", count: 1 },
-      { month: "August", driver: "Emanuel Dela Rosa", count: 1 },
-      { month: "August", driver: "Bryan Navarro", count: 1 },
-      { month: "August", driver: "Wewel Cortez", count: 1 },
-      { month: "August", driver: "Fredie Batalla", count: 1 },
-      { month: "August", driver: "Jomer Malejan", count: 1 },
-      { month: "August", driver: "Demmy Cabrera", count: 1 },
-      { month: "August", driver: "Betson", count: 1 },
-      { month: "August", driver: "Joriel Martinez", count: 1 },
-      { month: "August", driver: "Erwin", count: 1 },
-      { month: "August", driver: "Carlo Abag", count: 1 },
-      { month: "August", driver: "Mark", count: 1 },
-      { month: "August", driver: "Welen Serrano", count: 1 },
-      { month: "August", driver: "Anthony Bacong", count: 1 },
-      { month: "August", driver: "Kenwyn Mangahis", count: 1 },
-      { month: "August", driver: "Jether Jake Eglip", count: 1 },
-      { month: "August", driver: "Den Harold Ganacan", count: 1 },
-      { month: "August", driver: "Marvin Cruz", count: 1 },
-      { month: "August", driver: "Exiel Bienvenido", count: 1 },
+      { month: "August", driver: "Efren Lira", helpers: [] },
+      { month: "August", driver: "Emanuel Dela Rosa", helpers: [] },
+      { month: "August", driver: "Bryan Navarro", helpers: [] },
+      { month: "August", driver: "Wewel Cortez", helpers: [] },
+      { month: "August", driver: "Fredie Batalla", helpers: [] },
+      { month: "August", driver: "Jomer Malejan", helpers: [] },
+      { month: "August", driver: "Demmy Cabrera", helpers: [] },
+      { month: "August", driver: "Betson", helpers: [] },
+      { month: "August", driver: "Joriel Martinez", helpers: ["Erwin"] },
+      { month: "August", driver: "Carlo Abag", helpers: ["Mark"] },
+      { month: "August", driver: "Welen Serrano", helpers: ["Anthony Bacong"] },
+      { month: "August", driver: "Kenwyn Mangahis", helpers: ["Jake Eglip"] },
+      { month: "August", driver: "Den Ganacan", helpers: ["Marvin Cruz"] },
+      { month: "August", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
+      { month: "August", driver: "Exiel Bienvenido", helpers: [] },
+      { month: "August", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
+      { month: "August", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
 
       // September
-      { month: "September", driver: "Reynaldo Untulan", count: 2 },
-      { month: "September", driver: "Welen Serrano", count: 2 },
-      { month: "September", driver: "Marvin Cruz", count: 2 },
-      { month: "September", driver: "Efren Lira", count: 2 },
-      { month: "September", driver: "Renato Maictin", count: 2 },
-      { month: "September", driver: "Emanuel Dela Rosa", count: 2 },
-      { month: "September", driver: "Edgar Martinez", count: 2 },
-      { month: "September", driver: "Jether Jake Eglip", count: 2 },
-      { month: "September", driver: "Helbert Magistrado", count: 1 },
-      { month: "September", driver: "Christopher Panes", count: 1 },
-      { month: "September", driver: "Ken", count: 1 },
-      { month: "September", driver: "Marlon", count: 1 },
-      { month: "September", driver: "Jhun De Belen", count: 1 },
-      { month: "September", driver: "Harvey", count: 1 },
-      { month: "September", driver: "Jeff", count: 1 },
-      { month: "September", driver: "Michael Silvestre", count: 1 },
-      { month: "September", driver: "Jomer Malejan", count: 1 },
+      { month: "September", driver: "Helbert Magistrado", helpers: ["Emanuel Dela Rosa"] },
+      { month: "September", driver: "Chris Panes", helpers: ["Reynaldo Untulan", "Ken", "Jake"] },
+      { month: "September", driver: "Welen Serrano", helpers: ["Marlon"] },
+      { month: "September", driver: "Marvin Cruz", helpers: ["Jhun De Belen"] },
+      { month: "September", driver: "Efren Lira", helpers: ["Renato Maictin"] },
+      { month: "September", driver: "Harvey", helpers: [] },
+      { month: "September", driver: "Marvin Cruz", helpers: ["Jeff"] },
+      { month: "September", driver: "Michael Silvestre", helpers: [] },
+      { month: "September", driver: "Edgar Martinez", helpers: ["Emmanuel Dela Rosa"] },
+      { month: "September", driver: "Efren Lira", helpers: ["Jomer Malejan", "Reynaldo Untulan"] },
+      { month: "September", driver: "Welen Serrano", helpers: ["Jake Eglip"] },
+      { month: "September", driver: "Edgar Martinez", helpers: ["Renato Maictin"] },
 
       // October
-      { month: "October", driver: "Fredie Batalla", count: 1 },
-      { month: "October", driver: "Alex Abucayon", count: 1 },
-      { month: "October", driver: "Helbert Magistrado", count: 1 },
-      { month: "October", driver: "Efren Lira", count: 1 },
-      { month: "October", driver: "Edgar Martinez", count: 1 }
+      { month: "October", driver: "Freddie Batalla", helpers: ["Alex Abucayon", "Helbert Mahistrado"] },
+      { month: "October", driver: "Efren Lira", helpers: ["Edgar Martinez"] }
     ];
 
-    // Populate Driver Filter Dropdown
-    function populateDriverDropdown() {
-      const driverSelect = document.getElementById("driverFilter");
-      const uniqueDrivers = [...new Set(rawData.map(item => item.driver))].sort();
-      
-      uniqueDrivers.forEach(driver => {
-        const option = document.createElement("option");
-        option.value = driver;
-        option.textContent = driver;
-        driverSelect.appendChild(option);
+    function populatePersonDropdown() {
+      const personSelect = document.getElementById("personFilter");
+      const personSet = new Set();
+
+      logs.forEach(row => {
+        if (row.driver) personSet.add(row.driver);
+        row.helpers.forEach(h => personSet.add(h));
+      });
+
+      Array.from(personSet).sort().forEach(person => {
+        const opt = document.createElement("option");
+        opt.value = person;
+        opt.textContent = person;
+        personSelect.appendChild(opt);
       });
     }
 
-    // Render Table and Summary Stats
     function render() {
-      const monthFilter = document.getElementById("monthFilter").value;
-      const driverFilter = document.getElementById("driverFilter").value;
+      const selectedMonth = document.getElementById("monthFilter").value;
+      const selectedPerson = document.getElementById("personFilter").value;
+      const selectedRole = document.getElementById("roleFilter").value;
+
       const tableBody = document.getElementById("tableBody");
       const emptyMessage = document.getElementById("emptyMessage");
 
-      // Filter logic
-      let filtered = rawData.filter(item => {
-        const matchMonth = (monthFilter === "ALL") || (item.month === monthFilter);
-        const matchDriver = (driverFilter === "ALL") || (item.driver === driverFilter);
-        return matchMonth && matchDriver;
+      let filteredLogs = logs.filter(row => {
+        // Month Filter
+        if (selectedMonth !== "ALL" && row.month !== selectedMonth) return false;
+
+        // Person & Role Filters
+        if (selectedPerson !== "ALL") {
+          const isDriver = row.driver === selectedPerson;
+          const isHelper = row.helpers.includes(selectedPerson);
+
+          if (selectedRole === "Driver" && !isDriver) return false;
+          if (selectedRole === "Helper" && !isHelper) return false;
+          if (selectedRole === "ALL" && !isDriver && !isHelper) return false;
+        } else {
+          if (selectedRole === "Driver" && !row.driver) return false;
+          if (selectedRole === "Helper" && row.helpers.length === 0) return false;
+        }
+
+        return true;
       });
 
-      // If viewing ALL months with ALL drivers (or filtering by driver across months), 
-      // aggregate totals per driver or keep per month depending on month selection
-      let displayData = [];
-
-      if (monthFilter === "ALL" && driverFilter === "ALL") {
-        // Aggregate totals across all months
-        const totalsMap = {};
-        filtered.forEach(item => {
-          totalsMap[item.driver] = (totalsMap[item.driver] || 0) + item.count;
-        });
-        
-        displayData = Object.keys(totalsMap).map(driver => ({
-          driver: driver,
-          month: "Jan - Oct Total",
-          count: totalsMap[driver]
-        })).sort((a, b) => b.count - a.count);
-
-      } else if (monthFilter === "ALL" && driverFilter !== "ALL") {
-        // Show row per month for specific driver
-        displayData = filtered.map(item => ({
-          driver: item.driver,
-          month: item.month,
-          count: item.count
-        }));
-      } else {
-        // Specific month view
-        displayData = filtered.sort((a, b) => b.count - a.count);
-      }
-
-      // Update UI elements
+      // Update Table Content
       tableBody.innerHTML = "";
-      
-      if (displayData.length === 0) {
+
+      if (filteredLogs.length === 0) {
         emptyMessage.style.display = "block";
       } else {
         emptyMessage.style.display = "none";
-        displayData.forEach(item => {
+        filteredLogs.forEach(row => {
           const tr = document.createElement("tr");
+
+          const helpersHTML = row.helpers.length > 0 
+            ? row.helpers.map(h => `<span class="person-badge helper-badge">${h}</span>`).join("")
+            : `<span style="color: #444444;">—</span>`;
+
           tr.innerHTML = `
-            <td><strong>${item.driver}</strong></td>
-            <td>${item.month}</td>
-            <td><span class="badge">${item.count}</span></td>
+            <td><strong>${row.month}</strong></td>
+            <td><span class="person-badge driver-badge">${row.driver}</span></td>
+            <td>${helpersHTML}</td>
           `;
           tableBody.appendChild(tr);
         });
       }
 
-      // Update Cards
-      const grandTotal = filtered.reduce((sum, item) => sum + item.count, 0);
-      const uniqueDriversCount = new Set(filtered.map(i => i.driver)).size;
+      // Calculate Stats
+      let driverCount = 0;
+      let helperCount = 0;
 
-      document.getElementById("totalAppearances").textContent = grandTotal;
-      document.getElementById("activeDrivers").textContent = uniqueDriversCount;
-      document.getElementById("appearancesLabel").textContent = 
-        monthFilter === "ALL" ? "Total Appearances (Jan-Oct)" : `Appearances in ${monthFilter}`;
+      filteredLogs.forEach(row => {
+        if (selectedPerson === "ALL") {
+          if (row.driver) driverCount++;
+          helperCount += row.helpers.length;
+        } else {
+          if (row.driver === selectedPerson) driverCount++;
+          if (row.helpers.includes(selectedPerson)) helperCount++;
+        }
+      });
+
+      document.getElementById("statRows").textContent = filteredLogs.length;
+      document.getElementById("statDrivers").textContent = driverCount;
+      document.getElementById("statHelpers").textContent = helperCount;
     }
 
-    // Attach Event Listeners
     document.getElementById("monthFilter").addEventListener("change", render);
-    document.getElementById("driverFilter").addEventListener("change", render);
+    document.getElementById("personFilter").addEventListener("change", render);
+    document.getElementById("roleFilter").addEventListener("change", render);
 
-    // Initial Execution
-    populateDriverDropdown();
+    populatePersonDropdown();
     render();
   </script>
-
 </body>
 </html>
